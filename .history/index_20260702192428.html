@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | A Private Little Library</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        cjk: ['Noto Serif SC', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#0f0a0b',       
+                            text: '#f2ece4',     
+                            card: '#160e10',     
+                            accent: '#8c2b38',   
+                            gold: '#b59765',     
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0a0b;
+            color: #f2ece4;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #050304; }
+        ::-webkit-scrollbar-thumb { background: #3d2025; }
+        
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: 0; pointer-events: none; opacity: 0.3;
+        }
+        .content-layer { position: relative; z-index: 10; }
+        
+        /* --- THE NOVEL EXPERIENCE --- */
+        .hero-gradient {
+            background: radial-gradient(circle at 70% 30%, rgba(140, 43, 56, 0.15) 0%, transparent 60%),
+                        radial-gradient(circle at 20% 80%, rgba(181, 151, 101, 0.05) 0%, transparent 50%);
+        }
+        
+        .chapter-card {
+            background: linear-gradient(to right, rgba(255,255,255,0.01), transparent);
+            border-left: 1px solid transparent;
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .chapter-card:hover {
+            background: linear-gradient(to right, rgba(140, 43, 56, 0.15), transparent);
+            border-left: 1px solid #b59765;
+            padding-left: 2.5rem;
+        }
+
+        #reader-modal {
+            background: rgba(5, 3, 4, 0.98);
+            backdrop-filter: blur(30px);
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+        #reader-container {
+            background: #110b0c;
+            box-shadow: 0 0 100px rgba(0,0,0,1), 0 0 50px rgba(140, 43, 56, 0.15);
+            border: 1px solid rgba(181, 151, 101, 0.1);
+            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.8s ease;
+        }
+        .pdf-frame { filter: sepia(20%) brightness(0.9) contrast(1.1); mix-blend-mode: normal; }
+        .reader-loader {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif; font-style: italic; color: #b59765;
+            opacity: 0.5; z-index: 0; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
+
+        /* --- THE GALLERY EXPERIENCE --- */
+        .gallery-room {
+            position: relative;
+            padding: 8rem 0;
+            border-top: 1px solid rgba(255,255,255,0.02);
+        }
+        .spotlight-bg::before {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%; height: 80%;
+            background: radial-gradient(ellipse at center, rgba(181, 151, 101, 0.04) 0%, transparent 70%);
+            pointer-events: none; z-index: -1;
+        }
+
+        /* 
+           Museum Matting & Framing 
+           Fixed to allow natural image dimensions without cropping 
+        */
+        .museum-frame {
+            background: #0a0607;
+            padding: 1.5rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.03);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        @media (min-width: 768px) { .museum-frame { padding: 3rem; } }
+        
+        .museum-frame img {
+            max-width: 100%;
+            max-height: 85vh; /* Prevents extremely tall images from overflowing the screen */
+            object-fit: contain; /* Ensures the ENTIRE art piece is always visible */
+            display: block;
+            filter: sepia(10%) grayscale(15%) contrast(1.05);
+            transition: transform 2s cubic-bezier(0.19, 1, 0.22, 1), filter 2s ease;
+        }
+        .museum-frame:hover img {
+            transform: scale(1.03);
+            filter: sepia(0%) grayscale(0%) contrast(1.1);
+        }
+
+        .placard {
+            border-left: 1px solid rgba(181, 151, 101, 0.3);
+            padding-left: 1.5rem;
+            margin-top: 2rem;
+            opacity: 0.7;
+            transition: opacity 0.5s ease;
+        }
+        .group:hover .placard { opacity: 1; border-color: rgba(181, 151, 101, 0.8); }
+
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-gold selection:text-black">
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-700 bg-brand-bg/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-[100rem] mx-auto px-10 py-6 flex justify-between items-center">
+            <a href="#" class="text-[11px] font-light tracking-[0.4em] uppercase text-brand-gold">Long Yue</a>
+            <div class="space-x-16 text-[10px] font-light tracking-[0.3em] uppercase hidden md:block">
+                <!-- Tabs explicitly renamed to clarify navigation -->
+                <a href="#novel" class="hover:text-brand-gold transition-colors duration-500">The Novel</a>
+                <a href="#gallery" class="hover:text-brand-gold transition-colors duration-500">Art Gallery</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- The Novel Section -->
+    <section id="novel" class="relative min-h-screen flex items-center pt-32 pb-20 content-layer hero-gradient">
+        <div class="max-w-[100rem] mx-auto px-6 md:px-10 w-full grid grid-cols-1 xl:grid-cols-12 gap-20 items-center">
+            
+            <div class="xl:col-span-5">
+                <div class="flex items-center gap-6 mb-10 opacity-70">
+                    <div class="h-px w-12 bg-brand-gold"></div>
+                    <span class="text-[10px] font-light tracking-[0.4em] uppercase text-brand-gold">A Private Library</span>
+                </div>
+                
+                <h1 class="text-6xl md:text-8xl lg:text-[110px] font-serif leading-[1.05] mb-10 font-light italic">
+                    Self<span class="text-brand-accent font-sans text-4xl align-top">*</span><br>portrait<br>of MIMI
+                </h1>
+                
+                <p class="text-lg md:text-xl font-light font-sans leading-relaxed text-brand-text/50 max-w-md">
+                    A romantic story of distance, waiting, rain, and moonlight. Where the silence between messages speaks the loudest.
+                </p>
+            </div>
+
+            <!-- Chapter Menu -->
+            <div class="xl:col-span-7 bg-[#0a0607]/80 backdrop-blur-2xl rounded-sm p-8 md:p-16 shadow-2xl border border-brand-gold/10 relative">
+                <div class="flex justify-between items-end mb-12 pb-6 border-b border-brand-gold/10">
+                    <h2 class="text-2xl font-serif italic text-brand-text/80">Table of Contents</h2>
+                    <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">Vol. I</span>
+                </div>
+                
+                <div class="space-y-1">
+                    <div onclick="openModal('chap1', '第一天 (Day 1)')" class="chapter-card p-6 flex items-center justify-between gap-8 cursor-pointer group">
+                        <div class="flex items-center gap-8 pointer-events-none">
+                            <span class="text-brand-gold/30 font-serif text-3xl italic w-10 transition-colors group-hover:text-brand-gold">01</span>
+                            <div>
+                                <h3 class="text-xl font-cjk font-light text-brand-text mb-1 transition-transform group-hover:translate-x-2 duration-500">第一天</h3>
+                                <p class="text-sm text-brand-text/40 font-sans font-light transition-transform group-hover:translate-x-2 duration-500 delay-75">The first quiet evening after the moon goes offline.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div onclick="openModal('chap5', '第五天 (Day 5)')" class="chapter-card p-6 flex items-center justify-between gap-8 cursor-pointer group">
+                        <div class="flex items-center gap-8 pointer-events-none">
+                            <span class="text-brand-gold/30 font-serif text-3xl italic w-10 transition-colors group-hover:text-brand-gold">05</span>
+                            <div>
+                                <h3 class="text-xl font-cjk font-light text-brand-text mb-1 transition-transform group-hover:translate-x-2 duration-500">第五天</h3>
+                                <p class="text-sm text-brand-text/40 font-sans font-light transition-transform group-hover:translate-x-2 duration-500 delay-75">Memory opens a door between architecture, home, and longing.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div onclick="openModal('chap6', '第六天 (Day 6)')" class="chapter-card p-6 flex items-center justify-between gap-8 cursor-pointer group">
+                        <div class="flex items-center gap-8 pointer-events-none">
+                            <span class="text-brand-gold/30 font-serif text-3xl italic w-10 transition-colors group-hover:text-brand-gold">06</span>
+                            <div>
+                                <h3 class="text-xl font-cjk font-light text-brand-text mb-1 transition-transform group-hover:translate-x-2 duration-500">第六天</h3>
+                                <p class="text-sm text-brand-text/40 font-sans font-light transition-transform group-hover:translate-x-2 duration-500 delay-75">A storm arrives, and the heart finally learns what it was afraid to say.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div onclick="openModal('chap7', '第七天 (Day 7)')" class="chapter-card p-6 flex items-center justify-between gap-8 cursor-pointer group">
+                        <div class="flex items-center gap-8 pointer-events-none">
+                            <span class="text-brand-gold/30 font-serif text-3xl italic w-10 transition-colors group-hover:text-brand-gold">07</span>
+                            <div>
+                                <h3 class="text-xl font-cjk font-light text-brand-text mb-1 transition-transform group-hover:translate-x-2 duration-500">第七天</h3>
+                                <p class="text-sm text-brand-text/40 font-sans font-light transition-transform group-hover:translate-x-2 duration-500 delay-75">After the rain, two people meet again at the same door, changed.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE EXHIBITION (Experiential Gallery) -->
+    <section id="gallery" class="bg-brand-bg content-layer relative border-t border-white/5">
+        
+        <!-- Gallery Intro -->
+        <div class="py-40 flex flex-col items-center text-center px-6">
+            <span class="text-brand-gold/60 text-[10px] tracking-[0.5em] uppercase mb-8 font-light">The Exhibition</span>
+            <h2 class="text-6xl md:text-8xl font-serif font-light mb-12 italic">Visual Arts</h2>
+            <div class="h-px w-24 bg-brand-gold/20 mx-auto"></div>
+            <p class="mt-12 text-brand-text/40 font-sans font-light text-xl max-w-2xl leading-loose">
+                Step into a curated journey of ink and observation. Walk slowly. Each piece is displayed in its entirety, asking only for your time.
+            </p>
+        </div>
+
+        <!-- ROOM I: The Calligraphy Shrine -->
+        <div class="gallery-room spotlight-bg">
+            <div class="max-w-[100rem] mx-auto px-6 md:px-10">
+                
+                <div class="flex flex-col md:flex-row items-center gap-16 lg:gap-32">
+                    <div class="md:w-1/3 order-2 md:order-1">
+                        <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">Room I</span>
+                        <h3 class="text-5xl font-serif font-light text-brand-text mt-4 mb-8 italic">The Brush</h3>
+                        <p class="text-brand-text/50 font-light leading-loose text-lg">
+                            The dance of the brush cannot be edited or erased. It is a true record of the artist's breath, heartbeat, and emotion at an exact point in time. 
+                        </p>
+                        <div class="placard group">
+                            <h4 class="text-xl font-serif text-brand-text">ChiBiFu XingShu</h4>
+                            <p class="text-[11px] font-sans tracking-[0.2em] text-brand-gold/70 uppercase mt-2">Running Script Scroll</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Calligraphy Scroll: Scales naturally up to 85vh height without cropping -->
+                    <div class="md:w-2/3 order-1 md:order-2 w-full group">
+                        <div class="museum-frame">
+                            <img src="ChiBiFu-XingShu.jpg" alt="ChiBiFu XingShu">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROOM II: Flora & Fauna Corridor -->
+        <div class="gallery-room">
+            <div class="max-w-[100rem] mx-auto px-6 md:px-10">
+                
+                <div class="text-center mb-32">
+                    <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">Room II</span>
+                    <h3 class="text-5xl font-serif font-light text-brand-text mt-4 italic">Flora & Fauna</h3>
+                    <p class="mt-6 text-brand-text/50 font-light max-w-xl mx-auto">Capturing the fragile, fleeting beauty of life. Preserving vibrance in eternal stillness.</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-24 mb-40 group">
+                    <div class="md:w-3/5">
+                        <div class="museum-frame"><img src="Chinese_Flower_and_Bird_Painting/ChunFengSongNuan.jpg" alt="ChunFengSongNuan"></div>
+                    </div>
+                    <div class="md:w-2/5 placard">
+                        <h4 class="text-3xl font-serif">Chun Feng Song Nuan</h4>
+                        <p class="text-brand-text/40 mt-4 font-light leading-relaxed">A gentle breeze delivers the warmth of spring.</p>
+                    </div>
+                </div>
+
+                <!-- Diptych: Side by side natural scaling -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 mb-40">
+                    <div class="group flex flex-col h-full">
+                        <div class="museum-frame mb-8 flex-grow"><img src="Chinese_Flower_and_Bird_Painting/HuaKaiFuGui.jpg" alt="HuaKaiFuGui"></div>
+                        <div class="text-center"><h4 class="text-xl font-serif text-brand-text/80">Hua Kai Fu Gui</h4></div>
+                    </div>
+                    <div class="group flex flex-col h-full md:mt-24"> 
+                        <div class="museum-frame mb-8 flex-grow"><img src="Chinese_Flower_and_Bird_Painting/JinJiFuGui.jpg" alt="JinJiFuGui"></div>
+                        <div class="text-center"><h4 class="text-xl font-serif text-brand-text/80">Jin Ji Fu Gui</h4></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-24 mb-40 group">
+                    <div class="md:w-2/5 placard order-2 md:order-1 text-right border-l-0 border-r border-brand-gold/30 pr-6">
+                        <h4 class="text-3xl font-serif">The Bengal Watch</h4>
+                        <p class="text-brand-text/40 mt-4 font-light leading-relaxed">Quiet strength suspended in ink.</p>
+                    </div>
+                    <div class="md:w-3/5 order-1 md:order-2">
+                        <div class="museum-frame"><img src="Chinese_Flower_and_Bird_Painting/MengHuXiaShan.jpg" alt="MengHuXiaShan"></div>
+                    </div>
+                </div>
+
+                <!-- Small Studies Cluster: Let them define their own heights naturally -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="museum-frame"><img src="Chinese_Flower_and_Bird_Painting/huaniao1.jpg" alt="Study 1"></div>
+                    <div class="museum-frame"><img src="Chinese_Flower_and_Bird_Painting/huaniao2.jpg" alt="Study 2"></div>
+                    <div class="museum-frame"><img src="Chinese_Flower_and_Bird_Painting/MengHu.jpg" alt="Study 3"></div>
+                    <div class="museum-frame"><img src="Chinese_Flower_and_Bird_Painting/SongHeYanNian.jpg" alt="Study 4"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROOM III: Landscapes -->
+        <div class="gallery-room spotlight-bg border-t border-brand-gold/5">
+            <div class="max-w-[100rem] mx-auto px-6 md:px-10">
+                
+                <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                    <div>
+                        <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">Room III</span>
+                        <h3 class="text-5xl font-serif font-light text-brand-text mt-4 italic">The Vastness</h3>
+                    </div>
+                    <p class="md:max-w-sm text-brand-text/50 font-light text-sm leading-loose">Mountains, mists, and waters. A journey through scale, rendered in breath and profound silence.</p>
+                </div>
+
+                <!-- The Masterpiece: Full Width natural ratio -->
+                <div class="mb-32 group">
+                    <div class="museum-frame bg-[#050304]">
+                        <img src="Chinese_Landscape_Painting/YangZiRiver.jpg" alt="YangZiRiver">
+                    </div>
+                    <div class="placard max-w-md mx-auto text-center border-l-0 mt-8">
+                        <h4 class="text-2xl font-serif">The Yangtze</h4>
+                        <p class="text-[10px] font-sans tracking-[0.2em] text-brand-gold/50 uppercase mt-3">Panoramic Scroll</p>
+                    </div>
+                </div>
+
+                <!-- Triptych Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="group flex flex-col">
+                        <div class="museum-frame mb-6 flex-grow"><img src="Chinese_Landscape_Painting/GreatWall-XiongGuanWanLi.jpg" alt="XiongGuanWanLi"></div>
+                        <h4 class="text-lg font-serif text-center text-brand-text/60">Xiong Guan Wan Li</h4>
+                    </div>
+                    <div class="group flex flex-col">
+                        <div class="museum-frame mb-6 flex-grow"><img src="Chinese_Landscape_Painting/HuangShanYunHai.jpg" alt="HuangShanYunHai"></div>
+                        <h4 class="text-lg font-serif text-center text-brand-text/60">Huang Shan Yun Hai</h4>
+                    </div>
+                    <div class="group flex flex-col">
+                        <div class="museum-frame mb-6 flex-grow"><img src="Chinese_Landscape_Painting/JinBiShanShui.jpg" alt="JinBiShanShui"></div>
+                        <h4 class="text-lg font-serif text-center text-brand-text/60">Jin Bi Shan Shui</h4>
+                    </div>
+                </div>
+                
+                <!-- Assorted Landscapes -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16">
+                    <div class="group">
+                        <div class="museum-frame h-full"><img src="Chinese_Landscape_Painting/GreatWall.jpg" alt="Great Wall"></div>
+                    </div>
+                    <div class="grid grid-rows-2 gap-8">
+                        <div class="museum-frame"><img src="Chinese_Landscape_Painting/JinQiu.jpg" alt="Jin Qiu"></div>
+                        <div class="museum-frame"><img src="Chinese_Landscape_Painting/XiaoQiaoLiuShui.jpg" alt="Xiao Qiao Liu Shui"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROOM IV: XieYi & Sketches -->
+        <div class="gallery-room border-t border-brand-gold/5 pb-40">
+            <div class="max-w-[100rem] mx-auto px-6 md:px-10">
+                
+                <div class="text-center mb-24">
+                    <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">The Archives</span>
+                    <h3 class="text-5xl font-serif font-light text-brand-text mt-4 italic">Expression & Observation</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
+                    
+                    <div class="md:col-span-5 group sticky top-32">
+                        <div class="museum-frame"><img src="Freehand_brushwork/DaXieYi-BaJiao.jpg" alt="Ba Jiao"></div>
+                        <div class="placard"><h4 class="text-xl font-serif">Ba Jiao (Freehand)</h4></div>
+                    </div>
+
+                    <div class="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div class="museum-frame"><img src="Freehand_brushwork/DaXieYi-LanCao.jpg" alt="LanCao"></div>
+                        <div class="museum-frame"><img src="Freehand_brushwork/DaXieYi-SongShu-DaXieYi.jpg" alt="SongShu"></div>
+                        <div class="museum-frame"><img src="Freehand_brushwork/DaXieYi-HuLu-NanGua-DaXieYi.jpg" alt="HuLu"></div>
+                        <div class="museum-frame"><img src="Freehand_brushwork/DaXieYi-JuHua-DaXieYi.jpg" alt="JuHua"></div>
+                        <div class="museum-frame"><img src="Freehand_brushwork/DaXieYi-MoYeHeHua.jpg" alt="MoYeHeHua"></div>
+                        
+                        <!-- Sketches -->
+                        <div class="museum-frame"><img src="Sketch/bridge.jpg" alt="Bridge" class="grayscale opacity-90"></div>
+                        <div class="museum-frame sm:col-span-2"><img src="Sketch/cat.jpg" alt="Cat" class="grayscale opacity-90"></div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#050304] py-24 content-layer text-center">
+        <div class="w-12 h-px bg-brand-gold/20 mx-auto mb-10"></div>
+        <p class="text-brand-text/30 text-[9px] font-sans tracking-[0.5em] uppercase">A private library built with love.</p>
+    </footer>
+
+    <!-- CINEMATIC NOVEL READER MODAL -->
+    <div id="reader-modal" class="fixed inset-0 z-[100] hidden opacity-0 flex items-center justify-center p-4 sm:p-12">
+        <div id="reader-container" class="w-full max-w-7xl h-full lg:h-[92vh] rounded-sm flex flex-col relative overflow-hidden transform scale-95">
+            
+            <div class="px-8 py-6 border-b border-brand-gold/10 flex justify-between items-center bg-[#0a0607]/95 backdrop-blur-xl z-20 shrink-0">
+                <div class="flex items-center gap-5">
+                    <span class="w-1 h-1 rounded-full bg-brand-gold"></span>
+                    <h3 class="text-xl md:text-2xl font-serif italic text-brand-text font-light tracking-widest" id="modal-title">Chapter Title</h3>
+                </div>
+                
+                <button onclick="closeModal()" class="text-brand-text/50 hover:text-brand-gold transition-colors duration-300 p-2 group flex items-center gap-3">
+                    <span class="text-[10px] uppercase tracking-[0.3em] hidden md:block opacity-0 group-hover:opacity-100 transition-opacity">Close</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 w-full relative bg-[#0a0607]">
+                <div class="reader-loader">Retrieving pages...</div>
+                <div id="modal-content" class="absolute inset-0 z-10"></div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- HIDDEN CHAPTER CONTENT DATA -->
+    <div id="content-chap1" class="hidden"><iframe src="portrait-chap1.pdf" class="w-full h-full pdf-frame" style="border: none;" title="Chapter 1"></iframe></div>
+    <div id="content-chap5" class="hidden"><iframe src="Potrait-chap5.pdf" class="w-full h-full pdf-frame" style="border: none;" title="Chapter 5"></iframe></div>
+    <div id="content-chap6" class="hidden"><iframe src="Portrait-chap6.pdf" class="w-full h-full pdf-frame" style="border: none;" title="Chapter 6"></iframe></div>
+    <div id="content-chap7" class="hidden"><iframe src="Potrait-chap7.pdf" class="w-full h-full pdf-frame" style="border: none;" title="Chapter 7"></iframe></div>
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+        const canvas = document.querySelector('#bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 10;
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const particlesCount = 200; 
+        const particlesGeometry = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i+=3) {
+            posArray[i] = (Math.random() - 0.5) * 40;     
+            posArray[i+1] = (Math.random() - 0.5) * 40;   
+            posArray[i+2] = (Math.random() - 0.5) * 20;   
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.035, color: 0xb59765, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        let mouseX = 0; let mouseY = 0;
+        let targetX = 0; let targetY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) - 0.5;
+            mouseY = (event.clientY / window.innerHeight) - 0.5;
+        });
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            
+            targetX = targetX + (mouseX - targetX) * 0.015;
+            targetY = targetY + (mouseY - targetY) * 0.015;
+
+            particlesMesh.rotation.y = elapsedTime * 0.01 + targetX * 0.15;
+            particlesMesh.rotation.x = elapsedTime * 0.01 + targetY * 0.15;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+    
+    <script>
+        function openModal(chapterId, title) {
+            const modal = document.getElementById('reader-modal');
+            const container = document.getElementById('reader-container');
+            const contentDiv = document.getElementById('modal-content');
+            const titleDiv = document.getElementById('modal-title');
+            const sourceContent = document.getElementById('content-' + chapterId);
+
+            titleDiv.innerText = title;
+            contentDiv.innerHTML = sourceContent.innerHTML;
+            
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; 
+            
+            modal.classList.remove('opacity-0');
+            container.classList.remove('scale-95');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('reader-modal');
+            const container = document.getElementById('reader-container');
+
+            modal.classList.add('opacity-0');
+            container.classList.add('scale-95');
+            document.body.style.overflow = 'auto'; 
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('modal-content').innerHTML = '';
+            }, 800); 
+        }
+        
+        document.getElementById('reader-modal').addEventListener('click', function(e) {
+            if (e.target === this) { closeModal(); }
+        });
+    </script>
+</body>
+</html>

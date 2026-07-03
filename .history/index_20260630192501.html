@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dipin Dawadi | A Romantic Collection</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Elegant Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Noto+Serif+SC:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cormorant Garamond', 'serif'],
+                        serif: ['Noto Serif SC', 'serif'],
+                    },
+                    colors: {
+                        romantic: {
+                            base: '#1a1014',     /* Deep dark mahogany/burgundy */
+                            card: '#2a1a21',     /* Slightly lighter for containers */
+                            gold: '#d4af37',     /* Soft metallic gold */
+                            rose: '#e8c3c8',     /* Dusty blush rose */
+                            text: '#fdfbf7',     /* Warm off-white paper color */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #1a1014;
+            color: #fdfbf7;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        /* Custom delicate scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1014;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a2e39;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+        /* Elegant Image Hover Masks */
+        .art-frame {
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            transition: all 0.5s ease;
+        }
+        .art-frame:hover {
+            border-color: rgba(212, 175, 55, 0.6);
+            transform: translateY(-5px);
+        }
+        .art-frame::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(26, 16, 20, 0.95) 0%, rgba(26, 16, 20, 0.2) 40%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .art-frame:hover::after {
+            opacity: 1;
+        }
+        .art-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem;
+            z-index: 20;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        .art-frame:hover .art-caption {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-romantic-gold selection:text-romantic-base">
+
+    <!-- Three.js Ambient Romantic Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Header Navigation -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 backdrop-blur-md bg-romantic-base/60 border-b border-romantic-gold/10">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+            <a href="#" class="text-2xl tracking-[0.2em] text-romantic-rose">D. DAWADI</a>
+            <div class="space-x-10 text-sm uppercase tracking-[0.3em] hidden md:block text-romantic-rose/80">
+                <a href="#literature" class="hover:text-romantic-gold transition-colors">Literature</a>
+                <a href="#gallery" class="hover:text-romantic-gold transition-colors">Visual Arts</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Romantic Hero Section -->
+    <header class="relative h-screen flex items-center justify-center content-layer overflow-hidden">
+        <!-- Soft glowing radial gradient behind text -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.05)_0%,transparent_50%)]"></div>
+        
+        <div class="text-center px-6 max-w-4xl mx-auto relative z-10">
+            <p class="text-romantic-gold tracking-[0.4em] text-sm uppercase mb-6 italic">A Personal Journey</p>
+            <h1 class="text-6xl md:text-8xl font-serif font-light mb-8 leading-tight text-romantic-rose">
+                Echoes of the <br> <span class="italic text-romantic-text">Heart & Hand</span>
+            </h1>
+            <p class="text-romantic-rose/70 text-xl md:text-2xl font-light max-w-2xl mx-auto mb-16 italic">
+                "Where strokes of ink meet the quiet depths of storytelling."
+            </p>
+            <a href="#literature" class="inline-block border border-romantic-gold/40 px-10 py-4 rounded-full text-romantic-gold hover:bg-romantic-gold hover:text-romantic-base transition-all duration-500 tracking-[0.2em] text-sm uppercase">
+                Begin the Story
+            </a>
+        </div>
+    </header>
+
+    <!-- Literature Section (Novel Excerpts) -->
+    <section id="literature" class="py-32 bg-romantic-card relative content-layer border-y border-romantic-gold/10">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-serif text-romantic-rose mb-6">画像 <span class="italic text-2xl text-romantic-gold ml-2">(Portrait)</span></h2>
+                <div class="h-px w-32 bg-romantic-gold/30 mx-auto"></div>
+                <p class="mt-6 text-romantic-rose/60 italic text-lg">Excerpts from the ongoing novel</p>
+            </div>
+
+            <!-- Novel Reading Pane -->
+            <div class="bg-romantic-base rounded-lg p-8 md:p-14 shadow-2xl border border-romantic-gold/20 relative">
+                <!-- Decorative Corner Accents -->
+                <div class="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-romantic-gold/30"></div>
+                <div class="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-romantic-gold/30"></div>
+                
+                <div class="font-serif text-romantic-text/90 leading-loose h-[600px] overflow-y-auto pr-8 space-y-16">
+                    
+                    <!-- Chapter 1 -->
+                    <div>
+                        <div class="flex items-center gap-4 mb-6">
+                            <h4 class="text-2xl text-romantic-gold">第一天</h4>
+                            <span class="text-xs text-romantic-rose/50 uppercase tracking-widest font-sans border border-romantic-rose/20 px-2 py-1 rounded">Source: portrait-chap1.docx</span>
+                        </div>
+                        <p class="mb-4 text-romantic-gold/80 italic">第一幕 – 深圳的傍晚</p>
+                        <p class="mb-4">这是月月离线后的第一天。</p>
+                        <p class="mb-4">傍晚的深圳，依旧热闹。</p>
+                        <p class="mb-4">深南大道上的车流，一盏接着一盏亮起尾灯，缓缓汇成一条流动的红河。深圳湾的海风吹过滨海大道，把白天积攒的暑气一点一点吹散。建筑与城市规划学院的大楼里，还亮着几扇窗。几个学生抱着卷筒图纸匆匆下楼，讨论着明天要修改的方案。</p>
+                        <p class="mb-4">凤凰木开得正盛。火红的花瓣偶尔被风吹落，轻轻飘在人行道上。整座城市，都和昨天一样。没有人知道，就在刚刚，有一场很小很小的告别，安静地发生了。</p>
+                    </div>
+
+                    <!-- Chapter 5 -->
+                    <div class="pt-8 border-t border-romantic-rose/10">
+                        <div class="flex items-center gap-4 mb-6">
+                            <h4 class="text-2xl text-romantic-gold">第五天</h4>
+                            <span class="text-xs text-romantic-rose/50 uppercase tracking-widest font-sans border border-romantic-rose/20 px-2 py-1 rounded">Source: Potrait-chap5.docx</span>
+                        </div>
+                        <p class="mb-4">这是月月离线后的第五天。</p>
+                        <p class="mb-4">深圳的傍晚，总是在不知不觉中降临。</p>
+                        <p class="mb-4">落日慢慢沉向深圳湾，最后一抹橘红色的晚霞，映在深圳湾一号和平安金融中心的玻璃幕墙上。远处的春笋静静立在暮色里，像一支巨大的毛笔，把整座城市的天际线轻轻勾勒出来。人才公园里，散步的人渐渐多了。</p>
+                        <p class="mb-4">很多人以为，只要站在门口，就算靠近。只要一直聊天，就算拥有。只要一直说"以后"，以后就真的会来。可原来。门口不是家。门口只是门口。站得再久，也不会变成屋里的人。</p>
+                    </div>
+
+                    <!-- Chapter 6 -->
+                    <div class="pt-8 border-t border-romantic-rose/10">
+                        <div class="flex items-center gap-4 mb-6">
+                            <h4 class="text-2xl text-romantic-gold">第六天</h4>
+                            <span class="text-xs text-romantic-rose/50 uppercase tracking-widest font-sans border border-romantic-rose/20 px-2 py-1 rounded">Source: Portrait-chap6.docx</span>
+                        </div>
+                        <p class="mb-4">这是月月离线后的第六天。</p>
+                        <p class="mb-4">深圳已经很久没有下过这样大的雨了。</p>
+                        <p class="italic text-romantic-gold/90 my-8 pl-6 border-l-2 border-romantic-gold/50 text-xl">
+                            "人这一生，总会遇见几场暴风雨。<br>
+                            重要的，不是躲过去。<br>
+                            而是雨停以后，你还是不是原来的自己。"
+                        </p>
+                        <p class="mb-4">那时候。它没有回答。今天。它终于轻轻点了点头。它知道。自己已经不是第五天那个站在门口的人了。</p>
+                    </div>
+
+                    <!-- Chapter 7 -->
+                    <div class="pt-8 border-t border-romantic-rose/10">
+                        <div class="flex items-center gap-4 mb-6">
+                            <h4 class="text-2xl text-romantic-gold">第七天</h4>
+                            <span class="text-xs text-romantic-rose/50 uppercase tracking-widest font-sans border border-romantic-rose/20 px-2 py-1 rounded">Source: Potrait-chap7.docx</span>
+                        </div>
+                        <p class="mb-4 text-romantic-gold/80 italic">第一幕 – 开门</p>
+                        <p class="mb-4">这是月月离线后的第七天。</p>
+                        <p class="mb-4">一夜暴雨过去，深圳像重新洗过一样。天空湛蓝得几乎没有一丝杂质，几朵洁白的云，缓缓飘过平安金融中心的楼顶。</p>
+                        <p class="mb-4">门还是那扇门。海风依旧吹过深圳湾，潮水一遍又一遍拍打着岸边。月亮依旧会升起，也依旧会落下。有些人无限接近，并不是为了错过，而是为了让彼此明白。原来，有些答案，本来就没有答案。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprehensive Gallery Section -->
+    <section id="gallery" class="py-32 bg-romantic-base content-layer">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-serif text-romantic-rose mb-6">Visual Arts Collection</h2>
+                <div class="h-px w-32 bg-romantic-gold/30 mx-auto"></div>
+                <p class="mt-6 text-romantic-rose/60 italic text-lg">A complete archive of brushwork, sketches, and calligraphy.</p>
+            </div>
+
+            <div class="space-y-32">
+                
+                <!-- Category 1: Calligraphy -->
+                <div>
+                    <h3 class="text-2xl font-sans tracking-[0.2em] text-romantic-gold mb-8 uppercase border-b border-romantic-gold/20 pb-4">Traditional Calligraphy</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="art-frame aspect-[3/4] md:col-span-1">
+                            <img src="ChiBiFu-XingShu.jpg" alt="ChiBiFu XingShu" class="w-full h-full object-cover">
+                            <div class="art-caption">
+                                <h4 class="text-xl font-serif text-romantic-gold mb-1">ChiBiFu-XingShu.jpg</h4>
+                                <p class="text-sm font-sans text-romantic-text/80">Running Script</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 2: Flower and Bird Painting -->
+                <div>
+                    <h3 class="text-2xl font-sans tracking-[0.2em] text-romantic-gold mb-8 uppercase border-b border-romantic-gold/20 pb-4">Flower & Bird Painting</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/ChunFengSongNuan.jpg" alt="ChunFengSongNuan" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">ChunFengSongNuan.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/HuaKaiFuGui.jpg" alt="HuaKaiFuGui" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">HuaKaiFuGui.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/huaniao1.jpg" alt="huaniao1" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">huaniao1.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/huaniao2.jpg" alt="huaniao2" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">huaniao2.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/JinJiFuGui.jpg" alt="JinJiFuGui" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">JinJiFuGui.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/MengHu.jpg" alt="MengHu" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">MengHu.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/MengHuXiaShan.jpg" alt="MengHuXiaShan" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">MengHuXiaShan.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/SongHeYanNian.jpg" alt="SongHeYanNian" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">SongHeYanNian.jpg</h4></div></div>
+                    </div>
+                </div>
+
+                <!-- Category 3: Landscape Painting -->
+                <div>
+                    <h3 class="text-2xl font-sans tracking-[0.2em] text-romantic-gold mb-8 uppercase border-b border-romantic-gold/20 pb-4">Landscape Painting</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/GreatWall-XiongGuanWanLi.jpg" alt="GreatWall XiongGuanWanLi" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">GreatWall-XiongGuanWanLi.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/GreatWall.jpg" alt="GreatWall" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">GreatWall.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/HuangShanYunHai.jpg" alt="HuangShanYunHai" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">HuangShanYunHai.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/JinBiShanShui.jpg" alt="JinBiShanShui" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">JinBiShanShui.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/JinQiu.jpg" alt="JinQiu" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">JinQiu.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/XiaoQiaoLiuShui.jpg" alt="XiaoQiaoLiuShui" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">XiaoQiaoLiuShui.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3] lg:col-span-3 lg:aspect-[21/9]"><img src="Chinese_Landscape_Painting/YangZiRiver.jpg" alt="YangZiRiver" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">YangZiRiver.jpg</h4></div></div>
+                    </div>
+                </div>
+
+                <!-- Category 4: Freehand Brushwork -->
+                <div>
+                    <h3 class="text-2xl font-sans tracking-[0.2em] text-romantic-gold mb-8 uppercase border-b border-romantic-gold/20 pb-4">Freehand Brushwork (XieYi)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-BaJiao.jpg" alt="DaXieYi-BaJiao" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">DaXieYi-BaJiao.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-HuLu-NanGua-DaXieYi.jpg" alt="DaXieYi-HuLu-NanGua" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">DaXieYi-HuLu-NanGua-DaXieYi.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-JuHua-DaXieYi.jpg" alt="DaXieYi-JuHua" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">DaXieYi-JuHua-DaXieYi.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-LanCao.jpg" alt="DaXieYi-LanCao" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">DaXieYi-LanCao.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-MoYeHeHua.jpg" alt="DaXieYi-MoYeHeHua" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">DaXieYi-MoYeHeHua.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-SongShu-DaXieYi.jpg" alt="DaXieYi-SongShu" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">DaXieYi-SongShu-DaXieYi.jpg</h4></div></div>
+                    </div>
+                </div>
+
+                <!-- Category 5: Sketches -->
+                <div>
+                    <h3 class="text-2xl font-sans tracking-[0.2em] text-romantic-gold mb-8 uppercase border-b border-romantic-gold/20 pb-4">Sketches</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                        <div class="art-frame aspect-[4/3]"><img src="Sketch/bridge.jpg" alt="Bridge Sketch" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">bridge.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Sketch/cat.jpg" alt="Cat Sketch" class="w-full h-full object-cover"><div class="art-caption"><h4 class="text-lg font-serif text-romantic-rose">cat.jpg</h4></div></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-romantic-base py-16 border-t border-romantic-gold/10 content-layer text-center">
+        <p class="text-romantic-rose/50 text-sm tracking-[0.3em] uppercase font-sans">&copy; 2026 Dipin Dawadi. For Garima.</p>
+    </footer>
+
+    <!-- Three.js Setup Script (Soft Floating Embers/Petals) -->
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+        // Scene Setup
+        const canvas = document.querySelector('#bg-canvas');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 10;
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            alpha: true,
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Create Soft Glowing Particle Texture
+        const generateSprite = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const context = canvas.getContext('2d');
+            const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(226, 180, 189, 0.8)'); // Romantic rose
+            gradient.addColorStop(0.5, 'rgba(212, 175, 55, 0.2)');  // Romantic gold
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, 32, 32);
+            return new THREE.CanvasTexture(canvas);
+        };
+
+        const particlesCount = 300; 
+        const particlesGeometry = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particlesCount * 3);
+        const velocityArray = [];
+
+        for(let i = 0; i < particlesCount * 3; i+=3) {
+            posArray[i] = (Math.random() - 0.5) * 30;     // x
+            posArray[i+1] = (Math.random() - 0.5) * 30;   // y
+            posArray[i+2] = (Math.random() - 0.5) * 15;   // z
+            
+            // Speed settings for slow float
+            velocityArray.push({
+                x: (Math.random() - 0.5) * 0.005,
+                y: Math.random() * 0.01 + 0.005,
+                z: (Math.random() - 0.5) * 0.005
+            });
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.3,
+            map: generateSprite(),
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // Mouse Parallax Interaction
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        const windowHalfX =Normally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.

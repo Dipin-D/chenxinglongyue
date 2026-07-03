@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | A Private Little Library</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        cjk: ['Noto Serif SC', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#332125',       /* Deep maroon background */
+                            text: '#f8f4ed',     /* Off-white text */
+                            card: '#f4efe8',     /* Chapter card background */
+                            accent: '#b84654',   /* Circle accent color */
+                            dark: '#2c1c20',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #332125;
+            color: #f8f4ed;
+            overflow-x: hidden;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #332125;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #b84654;
+            border-radius: 4px;
+        }
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+        /* Gallery Hover Effects */
+        .art-frame {
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+            background: #2c1c20;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.5s ease;
+        }
+        .art-frame:hover {
+            transform: translateY(-5px);
+        }
+        .art-frame::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(44, 28, 32, 0.95) 0%, rgba(44, 28, 32, 0.2) 50%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .art-frame:hover::after {
+            opacity: 1;
+        }
+        .art-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem;
+            z-index: 20;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .art-frame:hover .art-caption {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        /* Rose Background for Hero */
+        .hero-bg {
+            background-image: radial-gradient(circle at 50% 50%, rgba(51,33,37,0.4) 0%, #332125 100%);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-accent selection:text-white">
+
+    <!-- Three.js Ambient Particles -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 backdrop-blur-sm bg-brand-bg/80 border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-8 py-6 flex justify-between items-center">
+            <a href="#" class="text-sm font-semibold tracking-[0.2em] uppercase">LONG YUE</a>
+            <div class="space-x-12 text-sm font-semibold tracking-[0.2em] uppercase hidden md:block">
+                <a href="#novel" class="hover:text-brand-accent transition-colors">NOVELS</a>
+                <a href="#gallery" class="hover:text-brand-accent transition-colors">GALLERY</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Novel Showcase Section (Matched to Mockup) -->
+    <section id="novel" class="relative min-h-screen flex items-center pt-24 pb-12 content-layer hero-bg">
+        <div class="max-w-7xl mx-auto px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
+            <!-- Left: Title Area -->
+            <div>
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-[1px] w-12 bg-brand-text"></div>
+                    <span class="text-sm font-bold tracking-[0.25em] uppercase">A PRIVATE LITTLE LIBRARY</span>
+                </div>
+                
+                <h1 class="text-7xl md:text-8xl lg:text-[100px] font-serif leading-[1.1] mb-8">
+                    Self-<br>portrait of<br>MIMI
+                </h1>
+                
+                <p class="text-xl md:text-2xl font-serif text-brand-text/90">
+                    A romantic story of distance, waiting, rain, and moonlight.
+                </p>
+            </div>
+
+            <!-- Right: Chapters Card -->
+            <div class="bg-brand-card text-brand-bg rounded-xl p-8 md:p-12 shadow-2xl relative">
+                <h2 class="text-sm font-bold tracking-[0.2em] uppercase text-brand-accent mb-8">CHAPTERS</h2>
+                
+                <div class="space-y-4">
+                    <!-- Chapter 1 -->
+                    <div class="bg-white rounded-lg p-6 flex items-center justify-between gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+                        <div class="flex items-center gap-6">
+                            <div class="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center flex-shrink-0">
+                                <span class="text-white text-[10px] font-bold tracking-wider leading-tight text-center">CHAPTER<br>1</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-cjk font-semibold mb-1">第一天</h3>
+                                <p class="text-sm text-gray-600 font-sans leading-relaxed">The first quiet evening after the moon goes offline.</p>
+                            </div>
+                        </div>
+                        <span class="text-brand-accent font-bold text-sm tracking-wide group-hover:underline">Read</span>
+                    </div>
+
+                    <!-- Chapter 5 -->
+                    <div class="bg-white rounded-lg p-6 flex items-center justify-between gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+                        <div class="flex items-center gap-6">
+                            <div class="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center flex-shrink-0">
+                                <span class="text-white text-[10px] font-bold tracking-wider leading-tight text-center">CHAPTER<br>5</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-cjk font-semibold mb-1">第五天</h3>
+                                <p class="text-sm text-gray-600 font-sans leading-relaxed">Memory opens a door between architecture, home, and longing.</p>
+                            </div>
+                        </div>
+                        <span class="text-brand-accent font-bold text-sm tracking-wide group-hover:underline">Read</span>
+                    </div>
+
+                    <!-- Chapter 6 -->
+                    <div class="bg-white rounded-lg p-6 flex items-center justify-between gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+                        <div class="flex items-center gap-6">
+                            <div class="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center flex-shrink-0">
+                                <span class="text-white text-[10px] font-bold tracking-wider leading-tight text-center">CHAPTER<br>6</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-cjk font-semibold mb-1">第六天</h3>
+                                <p class="text-sm text-gray-600 font-sans leading-relaxed">A storm arrives, and the heart finally learns what it was afraid to say.</p>
+                            </div>
+                        </div>
+                        <span class="text-brand-accent font-bold text-sm tracking-wide group-hover:underline">Read</span>
+                    </div>
+
+                    <!-- Chapter 7 -->
+                    <div class="bg-white rounded-lg p-6 flex items-center justify-between gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+                        <div class="flex items-center gap-6">
+                            <div class="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center flex-shrink-0">
+                                <span class="text-white text-[10px] font-bold tracking-wider leading-tight text-center">CHAPTER<br>7</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-cjk font-semibold mb-1">第七天</h3>
+                                <p class="text-sm text-gray-600 font-sans leading-relaxed">After the rain, two people meet again at the same door, changed.</p>
+                            </div>
+                        </div>
+                        <span class="text-brand-accent font-bold text-sm tracking-wide group-hover:underline">Read</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprehensive Gallery Section -->
+    <section id="gallery" class="py-32 bg-brand-dark content-layer border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="text-center mb-24">
+                <h2 class="text-4xl md:text-5xl font-serif mb-6">Visual Arts Collection</h2>
+                <div class="h-px w-24 bg-brand-accent mx-auto"></div>
+                <p class="mt-6 text-brand-text/60 italic font-serif text-lg">An archive of traditional ink and sketches.</p>
+            </div>
+
+            <div class="space-y-32">
+                <!-- Traditional Calligraphy -->
+                <div>
+                    <h3 class="text-xl font-sans font-semibold tracking-[0.2em] text-brand-text mb-8 uppercase border-b border-white/10 pb-4">Traditional Calligraphy</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div class="art-frame aspect-[3/4]">
+                            <img src="ChiBiFu-XingShu.jpg" alt="ChiBiFu XingShu" class="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity">
+                            <div class="art-caption">
+                                <h4 class="text-lg font-serif mb-1">ChiBiFu-XingShu.jpg</h4>
+                                <p class="text-xs font-sans text-brand-text/70 uppercase tracking-wider">Running Script</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flower & Bird Painting -->
+                <div>
+                    <h3 class="text-xl font-sans font-semibold tracking-[0.2em] text-brand-text mb-8 uppercase border-b border-white/10 pb-4">Flower & Bird Painting</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/ChunFengSongNuan.jpg" alt="ChunFengSongNuan" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">ChunFengSongNuan.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/HuaKaiFuGui.jpg" alt="HuaKaiFuGui" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">HuaKaiFuGui.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/huaniao1.jpg" alt="huaniao1" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">huaniao1.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/huaniao2.jpg" alt="huaniao2" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">huaniao2.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/JinJiFuGui.jpg" alt="JinJiFuGui" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">JinJiFuGui.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/MengHu.jpg" alt="MengHu" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">MengHu.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/MengHuXiaShan.jpg" alt="MengHuXiaShan" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">MengHuXiaShan.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Chinese_Flower_and_Bird_Painting/SongHeYanNian.jpg" alt="SongHeYanNian" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">SongHeYanNian.jpg</h4></div></div>
+                    </div>
+                </div>
+
+                <!-- Landscape Painting -->
+                <div>
+                    <h3 class="text-xl font-sans font-semibold tracking-[0.2em] text-brand-text mb-8 uppercase border-b border-white/10 pb-4">Landscape Painting</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/GreatWall-XiongGuanWanLi.jpg" alt="GreatWall XiongGuanWanLi" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">GreatWall-XiongGuanWanLi.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/GreatWall.jpg" alt="GreatWall" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">GreatWall.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/HuangShanYunHai.jpg" alt="HuangShanYunHai" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">HuangShanYunHai.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/JinBiShanShui.jpg" alt="JinBiShanShui" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">JinBiShanShui.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/JinQiu.jpg" alt="JinQiu" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">JinQiu.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Chinese_Landscape_Painting/XiaoQiaoLiuShui.jpg" alt="XiaoQiaoLiuShui" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">XiaoQiaoLiuShui.jpg</h4></div></div>
+                        <div class="art-frame aspect-[21/9] lg:col-span-3"><img src="Chinese_Landscape_Painting/YangZiRiver.jpg" alt="YangZiRiver" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">YangZiRiver.jpg</h4></div></div>
+                    </div>
+                </div>
+
+                <!-- Freehand Brushwork -->
+                <div>
+                    <h3 class="text-xl font-sans font-semibold tracking-[0.2em] text-brand-text mb-8 uppercase border-b border-white/10 pb-4">Freehand Brushwork (XieYi)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-BaJiao.jpg" alt="DaXieYi-BaJiao" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">DaXieYi-BaJiao.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-HuLu-NanGua-DaXieYi.jpg" alt="DaXieYi-HuLu-NanGua" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">DaXieYi-HuLu-NanGua-DaXieYi.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-JuHua-DaXieYi.jpg" alt="DaXieYi-JuHua" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">DaXieYi-JuHua-DaXieYi.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-LanCao.jpg" alt="DaXieYi-LanCao" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">DaXieYi-LanCao.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-MoYeHeHua.jpg" alt="DaXieYi-MoYeHeHua" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">DaXieYi-MoYeHeHua.jpg</h4></div></div>
+                        <div class="art-frame aspect-square"><img src="Freehand_brushwork/DaXieYi-SongShu-DaXieYi.jpg" alt="DaXieYi-SongShu" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">DaXieYi-SongShu-DaXieYi.jpg</h4></div></div>
+                    </div>
+                </div>
+
+                <!-- Sketches -->
+                <div>
+                    <h3 class="text-xl font-sans font-semibold tracking-[0.2em] text-brand-text mb-8 uppercase border-b border-white/10 pb-4">Sketches</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="art-frame aspect-[4/3]"><img src="Sketch/bridge.jpg" alt="Bridge Sketch" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">bridge.jpg</h4></div></div>
+                        <div class="art-frame aspect-[4/3]"><img src="Sketch/cat.jpg" alt="Cat Sketch" class="w-full h-full object-cover opacity-90 hover:opacity-100"><div class="art-caption"><h4 class="text-base font-serif">cat.jpg</h4></div></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#1f1317] py-16 border-t border-white/5 content-layer text-center">
+        <p class="text-brand-text/40 text-xs font-semibold tracking-[0.3em] uppercase">A private library built with love.</p>
+    </footer>
+
+    <!-- Three.js Setup Script (Complete and Uncut) -->
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+        // Scene, Camera, Renderer
+        const canvas = document.querySelector('#bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 10;
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            alpha: true,
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Create Particles
+        const particlesCount = 200; 
+        const particlesGeometry = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i+=3) {
+            posArray[i] = (Math.random() - 0.5) * 30;     
+            posArray[i+1] = (Math.random() - 0.5) * 30;   
+            posArray[i+2] = (Math.random() - 0.5) * 15;   
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        // Soft pink/maroon particles to match theme
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0xb84654,
+            transparent: true,
+            opacity: 0.4,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // Mouse Interaction
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) - 0.5;
+            mouseY = (event.clientY / window.innerHeight) - 0.5;
+        });
+
+        // Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Gentle rotation and mouse tracking
+            particlesMesh.rotation.y = elapsedTime * 0.03 + mouseX * 0.1;
+            particlesMesh.rotation.x = elapsedTime * 0.02 + mouseY * 0.1;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

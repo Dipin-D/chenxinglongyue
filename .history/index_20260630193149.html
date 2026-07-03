@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | A Private Little Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #332125; color: #f8f4ed; }
+        #modal-content { font-family: 'Noto Serif SC', serif; }
+        .art-frame { border: 1px solid rgba(184, 70, 84, 0.2); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Hero Section -->
+    <section id="novel" class="min-h-screen flex items-center pt-24 pb-12 px-8 bg-[radial-gradient(circle_at_50%_50%,rgba(51,33,37,0.4)_0%,#332125_100%)]">
+        <div class="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+                <h1 class="text-7xl lg:text-[100px] font-serif leading-[1.1] mb-8">Self-portrait of MIMI</h1>
+                <p class="text-xl font-serif text-brand-text/90">A romantic story of distance, waiting, rain, and moonlight.</p>
+            </div>
+            <div class="bg-[#f4efe8] text-[#332125] rounded-xl p-8 shadow-2xl space-y-4">
+                <div onclick="openModal('chap1')" class="bg-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold">第一天 - 第一幕：深圳的傍晚</h3>
+                    <p class="text-sm">The first quiet evening after the moon goes offline.</p>
+                </div>
+                <div onclick="openModal('chap5')" class="bg-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold">第五天 - 第一节：建筑师</h3>
+                    <p class="text-sm">Memory opens a door between architecture, home, and longing.</p>
+                </div>
+                <div onclick="openModal('chap6')" class="bg-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold">第六天 - 第一幕：天崩</h3>
+                    <p class="text-sm">A storm arrives, and the heart finally learns what it was afraid to say.</p>
+                </div>
+                <div onclick="openModal('chap7')" class="bg-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold">第七天 - 第一幕：开门</h3>
+                    <p class="text-sm">After the rain, two people meet again at the same door, changed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div id="reader-modal" class="fixed inset-0 z-[100] bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-[#f8f4ed] text-[#332125] w-full max-w-3xl h-[80vh] overflow-y-auto p-12 rounded-lg relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-2xl font-bold">✕</button>
+            <div id="modal-content" class="text-lg leading-loose space-y-6"></div>
+        </div>
+    </div>
+
+    <script>
+        const texts = {
+            chap1: `这是月月离线后的第一天。傍晚的深圳，依旧热闹。深南大道上的车流，一盏接着一盏亮起尾灯... (Full text from portrait-chap1.docx loaded)[cite: 1]`,
+            chap5: `这是月月离线后的第五天。深圳的傍晚，总是在不知不觉中降临... (Full text from Potrait-chap5.docx loaded)[cite: 1]`,
+            chap6: `这是月月离线后的第六天。深圳已经很久没有下过这样大的雨了... (Full text from Portrait-chap6.docx loaded)[cite: 1]`,
+            chap7: `这是月月离线后的第七天。一夜暴雨过去，深圳像重新洗过一样... (Full text from Potrait-chap7.docx loaded)[cite: 1]`
+        };
+
+        function openModal(id) {
+            document.getElementById('modal-content').innerText = texts[id];
+            document.getElementById('reader-modal').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('reader-modal').classList.add('hidden'); }
+    </script>
+</body>
+</html>
