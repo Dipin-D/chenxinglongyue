@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | Calligraphy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'], cjk: ['Noto Serif SC', 'serif'] }, colors: { brand: { bg: '#0f0a0b', text: '#f2ece4', gold: '#b59765' } } } } }
+    </script>
+    <style>
+        body { 
+            background-color: #0f0a0b; 
+            /* Subtle, minimal radial depth - replaces standard flat black */
+            background: radial-gradient(circle at 50% 50%, #1a1617 0%, #0f0a0b 100%);
+            color: #f2ece4; 
+            overflow-x: hidden; 
+        }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #050304; } ::-webkit-scrollbar-thumb { background: #3d2025; }
+        
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.15; }
+        .content-layer { position: relative; z-index: 10; }
+        .gallery-room { position: relative; min-height: 100vh; display: flex; align-items: center; padding: 8rem 0; }
+        
+        /* Minimal frame wrapper */
+        .museum-frame { 
+            background: #050304; 
+            padding: 1.5rem; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            display: inline-block; 
+            margin: 0 auto;
+        }
+        
+        .museum-frame img { 
+            display: block;
+            max-width: 100%; 
+            max-height: 70vh; 
+            filter: sepia(5%) grayscale(10%) contrast(1.05); 
+            transition: transform 1.5s ease; 
+        }
+        
+        .museum-frame:hover img { transform: scale(1.01); }
+        .placard { border-left: 1px solid rgba(181, 151, 101, 0.2); padding-left: 1.5rem; margin-top: 2rem; opacity: 0.6; }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-gold selection:text-black">
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="fixed w-full z-50 top-0 bg-brand-bg/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-[100rem] mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
+            <a href="index.html" class="text-[11px] font-light tracking-[0.4em] uppercase text-brand-gold">
+                <span class="lang-en">Long Yue</span><span class="lang-zh hidden font-cjk tracking-widest text-sm">珑月</span>
+            </a>
+            <div class="flex items-center gap-8 md:gap-12 text-[10px] font-light tracking-[0.3em] uppercase">
+                <div class="hidden md:flex space-x-10">
+                    <a href="novels.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Novels</span><span class="lang-zh hidden font-cjk text-xs">小说</span></a>
+                    <a href="calligraphy.html" class="text-brand-gold transition-colors duration-500 border-b border-brand-gold pb-1"><span class="lang-en">Calligraphy</span><span class="lang-zh hidden font-cjk text-xs">书法</span></a>
+                    <a href="chinese-painting.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Painting</span><span class="lang-zh hidden font-cjk text-xs">国画</span></a>
+                    <a href="seal-engraving.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Seal Engraving</span><span class="lang-zh hidden font-cjk text-xs">金石</span></a>
+                </div>
+                <div class="flex items-center gap-3 border-l border-white/20 pl-8 md:pl-12">
+                    <button id="btn-en" onclick="setLanguage('en')" class="hover:text-brand-gold transition-colors text-brand-gold">EN</button>
+                    <span class="text-white/20">/</span>
+                    <button id="btn-zh" onclick="setLanguage('zh')" class="hover:text-brand-gold transition-colors font-cjk text-xs">中文</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="gallery-room content-layer">
+        <div class="max-w-[100rem] mx-auto px-6 md:px-10 w-full">
+            <div class="flex flex-col md:flex-row items-center gap-16 lg:gap-32">
+                <div class="md:w-1/3 order-2 md:order-1">
+                    <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">
+                        <span class="lang-en">Room II</span><span class="lang-zh hidden font-cjk">第二展厅</span>
+                    </span>
+                    <h3 class="text-5xl font-serif font-light text-brand-text mt-4 mb-8 italic">
+                        <span class="lang-en">The Brush</span><span class="lang-zh hidden font-cjk not-italic">笔墨</span>
+                    </h3>
+                    <p class="text-brand-text/50 font-light leading-loose text-lg">
+                        <span class="lang-en">The dance of the brush cannot be edited or erased. It is a true record of the artist's breath, heartbeat, and emotion at an exact point in time.</span>
+                        <span class="lang-zh hidden font-cjk">书法的落笔不可更改与抹去。它是艺术家在特定时刻呼吸、心跳与情感的真实记录。</span>
+                    </p>
+                    <div class="placard">
+                        <h4 class="text-xl font-cjk text-brand-text">赤壁赋 (行书)</h4>
+                        <p class="text-[11px] font-sans tracking-[0.2em] text-brand-gold/70 uppercase mt-2">
+                            <span class="lang-en">ChiBiFu (Running Script Scroll)</span><span class="lang-zh hidden font-cjk">苏轼《赤壁赋》卷</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="md:w-2/3 order-1 md:order-2 w-full flex justify-center">
+                    <div class="museum-frame"><img src="书法_Calligraphy/ChiBiFu-XingShu.jpg" alt="ChiBiFu XingShu"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            document.querySelectorAll('.lang-en').forEach(el => lang === 'en' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.querySelectorAll('.lang-zh').forEach(el => lang === 'zh' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.getElementById('btn-en').classList.toggle('text-brand-gold', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('text-brand-gold', lang === 'zh');
+        }
+        document.addEventListener('DOMContentLoaded', () => setLanguage(localStorage.getItem('preferredLang') || 'en'));
+    </script>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        const canvas = document.querySelector('#bg-canvas'); const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000); camera.position.z = 10;
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight);
+        const posArray = new Float32Array(400); for(let i=0; i<400; i++) posArray[i] = (Math.random() - 0.5) * 40;
+        const particlesGeometry = new THREE.BufferGeometry(); particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMesh = new THREE.Points(particlesGeometry, new THREE.PointsMaterial({ size: 0.02, color: 0xb59765, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending })); scene.add(particlesMesh);
+        let mouseX=0, mouseY=0, targetX=0, targetY=0; document.addEventListener('mousemove', (e) => { mouseX=(e.clientX/window.innerWidth)-0.5; mouseY=(e.clientY/window.innerHeight)-0.5; });
+        const clock = new THREE.Clock(); function animate() { requestAnimationFrame(animate); targetX+=(mouseX-targetX)*0.01; targetY+=(mouseY-targetY)*0.01; particlesMesh.rotation.y = clock.getElapsedTime()*0.005 + targetX*0.05; particlesMesh.rotation.x = clock.getElapsedTime()*0.005 + targetY*0.05; renderer.render(scene, camera); } animate();
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | Chinese Painting Museum</title>
+
+    <!-- Existing visual stack preserved: Tailwind + original typography -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Museum experience libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        cjk: ['Noto Serif SC', 'serif']
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#0f0a0b',
+                            text: '#f2ece4',
+                            gold: '#b59765',
+                            ember: '#4a1218',
+                            ink: '#050304'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --museum-bg: #0f0a0b;
+            --museum-ink: #050304;
+            --museum-text: #f2ece4;
+            --museum-gold: #b59765;
+            --museum-red: #4a1218;
+            --room-glow: rgba(181, 151, 101, 0.09);
+            --room-haze: rgba(255, 236, 204, 0.035);
+            --camera-y: 0px;
+            --breath-x: 0px;
+            --breath-y: 0px;
+        }
+
+        * { box-sizing: border-box; }
+        html { background: var(--museum-bg); }
+        body {
+            margin: 0;
+            background:
+                radial-gradient(circle at 50% -10%, rgba(181,151,101,0.12), transparent 35rem),
+                linear-gradient(180deg, #0f0a0b 0%, #050304 100%);
+            color: var(--museum-text);
+            overflow-x: hidden;
+            font-family: Inter, sans-serif;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            background:
+                linear-gradient(90deg, rgba(0,0,0,0.45), transparent 16%, transparent 84%, rgba(0,0,0,0.45)),
+                radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.55) 100%);
+            opacity: 0.85;
+            mix-blend-mode: multiply;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0.08;
+            background-image:
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 4px);
+            mix-blend-mode: overlay;
+        }
+
+        ::selection { background: var(--museum-gold); color: #050304; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050304; }
+        ::-webkit-scrollbar-thumb { background: #3d2025; border-radius: 999px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        #environment-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.72;
+        }
+
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+
+        .museum-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 80;
+            background: linear-gradient(180deg, rgba(5,3,4,0.88), rgba(5,3,4,0.54), transparent);
+            backdrop-filter: blur(18px);
+        }
+
+        .nav-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: var(--progress, 0%);
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--museum-gold), transparent);
+            opacity: 0.85;
+        }
+
+        .lang-zh.hidden,
+        .lang-en.hidden { display: none !important; }
+
+        .entrance-sequence {
+            position: fixed;
+            inset: 0;
+            z-index: 120;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 55%, rgba(181,151,101,0.10), transparent 24rem),
+                radial-gradient(circle at 50% 10%, rgba(74,18,24,0.30), transparent 30rem),
+                #000;
+        }
+
+        .entrance-veil {
+            position: absolute;
+            inset: 0;
+            opacity: 0.42;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(181,151,101,0.08), transparent 18rem),
+                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.05), transparent 14rem);
+            filter: blur(2px);
+        }
+
+        .ink-cloud {
+            position: absolute;
+            width: 55vmin;
+            height: 55vmin;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(181,151,101,0.12), transparent 30%),
+                radial-gradient(circle at 34% 54%, rgba(74,18,24,0.20), transparent 34%),
+                radial-gradient(circle at 64% 44%, rgba(255,255,255,0.06), transparent 31%);
+            filter: blur(42px);
+            opacity: 0;
+            animation: inkBreath 7s ease-in-out infinite alternate;
+        }
+
+        @keyframes inkBreath {
+            from { transform: scale(0.84) rotate(-3deg); }
+            to { transform: scale(1.08) rotate(4deg); }
+        }
+
+        .entrance-panel {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: min(92vw, 850px);
+            padding: 8rem 2rem;
+        }
+
+        .seal-mark {
+            width: 92px;
+            height: 92px;
+            margin: 0 auto 2rem;
+            display: grid;
+            place-items: center;
+            border: 2px solid rgba(166, 31, 32, 0.82);
+            color: rgba(205, 49, 47, 0.96);
+            font-family: "Noto Serif SC", serif;
+            font-size: 2.1rem;
+            line-height: 1;
+            transform: rotate(-4deg) scale(0.84);
+            opacity: 0;
+            box-shadow: inset 0 0 0 6px rgba(166,31,32,0.06), 0 0 45px rgba(166,31,32,0.18);
+        }
+
+        .brush-title {
+            position: relative;
+            display: inline-block;
+            font-family: "Playfair Display", serif;
+            font-style: italic;
+            font-size: clamp(4rem, 13vw, 10rem);
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            line-height: 0.9;
+            color: var(--museum-text);
+            clip-path: inset(0 100% 0 0);
+            text-shadow: 0 20px 80px rgba(181,151,101,0.12);
+        }
+
+        .brush-title::after {
+            content: "";
+            position: absolute;
+            left: -7%;
+            top: 48%;
+            width: 114%;
+            height: 42%;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(181,151,101,0.12), transparent);
+            transform: translateY(-50%) rotate(-1deg);
+            opacity: 0.72;
+            filter: blur(12px);
+        }
+
+        .entrance-subtitle {
+            opacity: 0;
+            margin-top: 2rem;
+            letter-spacing: 0.45em;
+            text-transform: uppercase;
+            color: rgba(181,151,101,0.72);
+            font-size: 0.68rem;
+            font-weight: 300;
+        }
+
+        .enter-button {
+            opacity: 0;
+            margin-top: 3rem;
+            border: 1px solid rgba(181,151,101,0.42);
+            color: var(--museum-text);
+            padding: 1.05rem 2.2rem;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            background:
+                linear-gradient(90deg, transparent, rgba(181,151,101,0.08), transparent),
+                rgba(255,255,255,0.02);
+            transition: border-color 700ms ease, background 700ms ease, transform 700ms ease, color 700ms ease;
+        }
+
+        .enter-button:hover,
+        .enter-button:focus-visible {
+            border-color: rgba(181,151,101,0.95);
+            color: var(--museum-gold);
+            transform: translateY(-2px);
+            background: rgba(181,151,101,0.08);
+            outline: none;
+        }
+
+        .sound-toggle {
+            border: 1px solid rgba(255,255,255,0.10);
+            color: rgba(242,236,228,0.72);
+            padding: 0.5rem 0.7rem;
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            transition: all 400ms ease;
+        }
+
+        .sound-toggle:hover,
+        .sound-toggle:focus-visible {
+            color: var(--museum-gold);
+            border-color: rgba(181,151,101,0.42);
+            outline: none;
+        }
+
+        .camera-shell {
+            position: relative;
+            transform: translate3d(var(--breath-x), var(--breath-y), 0);
+            will-change: transform;
+        }
+
+        .room,
+        .transition-space {
+            position: relative;
+            min-height: 130vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            border-top: 1px solid rgba(255,255,255,0.035);
+        }
+
+        .room::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 50% 36%, var(--room-glow), transparent 44rem),
+                radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.74), transparent 48rem),
+                linear-gradient(180deg, rgba(255,255,255,0.025), transparent 24%, rgba(0,0,0,0.30));
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .room::after {
+            content: "";
+            position: absolute;
+            inset: auto 7vw 8vh;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(181,151,101,0.24), transparent);
+            opacity: 0.55;
+        }
+
+        .room-inner {
+            width: min(100%, 110rem);
+            margin: 0 auto;
+            padding: 9rem 1.4rem 8rem;
+            opacity: 0;
+            transform: translateY(72px) scale(0.985);
+            will-change: transform, opacity;
+        }
+
+        @media (min-width: 768px) {
+            .room-inner { padding: 12rem 2.4rem 10rem; }
+        }
+
+        .room-kicker {
+            color: rgba(181,151,101,0.72);
+            font-size: 0.64rem;
+            letter-spacing: 0.42em;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .room-title {
+            font-family: "Playfair Display", "Noto Serif SC", serif;
+            font-size: clamp(3.4rem, 8vw, 8.4rem);
+            font-weight: 300;
+            line-height: 0.94;
+            margin-top: 1rem;
+            letter-spacing: -0.035em;
+        }
+
+        .room-title .lang-en { font-style: italic; }
+        .room-title .lang-zh { font-style: normal; letter-spacing: 0.06em; }
+
+        .room-note {
+            max-width: 42rem;
+            margin-top: 1.8rem;
+            color: rgba(242,236,228,0.58);
+            font-family: "Playfair Display", "Noto Serif SC", serif;
+            font-style: italic;
+            font-size: clamp(1.1rem, 2vw, 1.65rem);
+            line-height: 1.6;
+        }
+
+        .architectural-lines {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.16;
+            background:
+                linear-gradient(90deg, transparent 8%, rgba(181,151,101,0.20) 8.1%, transparent 8.2%),
+                linear-gradient(90deg, transparent 91.8%, rgba(181,151,101,0.20) 92%, transparent 92.2%),
+                linear-gradient(180deg, transparent 22%, rgba(181,151,101,0.10) 22.1%, transparent 22.2%);
+            mask-image: linear-gradient(180deg, transparent, #000 20%, #000 72%, transparent);
+        }
+
+        .entrance-hall {
+            min-height: 116vh;
+            text-align: center;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(181,151,101,0.09), transparent 25rem),
+                linear-gradient(180deg, #090506, #0f0a0b 48%, #050304);
+        }
+
+        .entrance-hall .room-inner {
+            display: grid;
+            place-items: center;
+        }
+
+        .hall-medallion {
+            width: min(48vw, 320px);
+            aspect-ratio: 1;
+            border: 1px solid rgba(181,151,101,0.18);
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 3rem;
+            background:
+                radial-gradient(circle, rgba(181,151,101,0.08), transparent 62%),
+                rgba(255,255,255,0.015);
+            box-shadow: inset 0 0 80px rgba(181,151,101,0.035);
+        }
+
+        .hall-medallion span {
+            font-family: "Noto Serif SC", serif;
+            color: rgba(181,151,101,0.72);
+            font-size: clamp(4rem, 12vw, 8rem);
+        }
+
+        .empty-gallery {
+            margin-top: 6rem;
+            min-height: 48vh;
+            border: 1px solid rgba(181,151,101,0.13);
+            background:
+                linear-gradient(90deg, rgba(255,255,255,0.012), rgba(181,151,101,0.038), rgba(255,255,255,0.012)),
+                rgba(255,255,255,0.018);
+            display: grid;
+            place-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .empty-gallery::before {
+            content: "";
+            position: absolute;
+            inset: 14% 12%;
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 0 70px rgba(181,151,101,0.04);
+        }
+
+        .empty-gallery p {
+            position: relative;
+            max-width: 34rem;
+            padding: 2rem;
+            color: rgba(242,236,228,0.40);
+            font-family: "Playfair Display", "Noto Serif SC", serif;
+            font-style: italic;
+            font-size: clamp(1.2rem, 2vw, 1.7rem);
+            line-height: 1.6;
+        }
+
+        .art-wall {
+            margin-top: clamp(5rem, 10vw, 12rem);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(5rem, 9vw, 10rem);
+        }
+
+        @media (min-width: 860px) {
+            .art-wall {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: clamp(5rem, 7vw, 9rem) clamp(3rem, 5vw, 6rem);
+            }
+            .art-wall .artwork-card:nth-child(3n + 1) { transform: translateY(6rem); }
+            .art-wall .artwork-card:nth-child(4n) { transform: translateY(-3rem); }
+        }
+
+        @media (min-width: 1180px) {
+            .art-wall.three {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .hero-work {
+            margin-top: clamp(6rem, 10vw, 12rem);
+            max-width: 96rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .artwork-card {
+            position: relative;
+            cursor: zoom-in;
+            isolation: isolate;
+            opacity: 0;
+            transform: translateY(90px) scale(0.96);
+            will-change: transform, opacity, filter;
+        }
+
+        .artwork-card:focus-within,
+        .artwork-card:hover {
+            z-index: 3;
+        }
+
+        .artwork-button {
+            all: unset;
+            display: block;
+            width: 100%;
+            cursor: zoom-in;
+        }
+
+        .museum-frame {
+            position: relative;
+            background:
+                linear-gradient(145deg, rgba(255,255,255,0.045), rgba(255,255,255,0.005)),
+                #050304;
+            padding: clamp(1rem, 2.2vw, 2.6rem);
+            border: 1px solid rgba(255,255,255,0.055);
+            box-shadow:
+                0 48px 90px rgba(0,0,0,0.72),
+                inset 0 0 0 1px rgba(181,151,101,0.055);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 18rem;
+        }
+
+        .museum-frame::before {
+            content: "";
+            position: absolute;
+            inset: -45% -20%;
+            z-index: 1;
+            background:
+                radial-gradient(ellipse at 50% 12%, rgba(255,235,195,0.18), transparent 30%),
+                linear-gradient(180deg, rgba(255,255,255,0.06), transparent 34%, rgba(0,0,0,0.34));
+            opacity: var(--spotlight, 0.28);
+            transition: opacity 1200ms cubic-bezier(.2,.8,.2,1);
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .museum-frame::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            opacity: 0.20;
+            background:
+                linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.13), transparent 46%),
+                radial-gradient(ellipse at bottom, rgba(181,151,101,0.10), transparent 52%);
+            transform: translateX(-30%);
+            transition: transform 1800ms cubic-bezier(.19,1,.22,1), opacity 1200ms ease;
+            pointer-events: none;
+        }
+
+        .artwork-card:hover .museum-frame::after,
+        .artwork-card:focus-within .museum-frame::after {
+            transform: translateX(20%);
+            opacity: 0.32;
+        }
+
+        .museum-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 1;
+            filter: sepia(8%) grayscale(10%) contrast(1.04) brightness(0.86);
+            transform: scale(1.018);
+            transition:
+                transform 2200ms cubic-bezier(.19,1,.22,1),
+                filter 1800ms cubic-bezier(.19,1,.22,1),
+                opacity 1200ms ease;
+            opacity: 0;
+        }
+
+        .artwork-card.is-visible img {
+            opacity: 1;
+        }
+
+        .artwork-card:hover img,
+        .artwork-card:focus-within img {
+            transform: scale(1.035) translate3d(var(--tilt-x, 0px), var(--tilt-y, 0px), 0);
+            filter: sepia(0%) grayscale(0%) contrast(1.08) brightness(1.02);
+        }
+
+        .placard {
+            text-align: center;
+            margin-top: 1.65rem;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 1000ms ease, transform 1000ms ease;
+        }
+
+        .artwork-card.is-visible .placard {
+            opacity: 0.76;
+            transform: translateY(0);
+            transition-delay: 400ms;
+        }
+
+        .artwork-card:hover .placard,
+        .artwork-card:focus-within .placard {
+            opacity: 1;
+        }
+
+        .placard h4 {
+            font-family: "Noto Serif SC", serif;
+            font-size: clamp(1.1rem, 1.7vw, 1.55rem);
+            color: rgba(242,236,228,0.93);
+        }
+
+        .placard p {
+            margin-top: 0.45rem;
+            color: rgba(181,151,101,0.60);
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            font-size: 0.66rem;
+        }
+
+        .wide-frame img { max-height: 72vh; object-fit: contain; }
+
+        .transition-space {
+            min-height: 82vh;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background:
+                radial-gradient(ellipse at center, rgba(181,151,101,0.06), transparent 34rem),
+                linear-gradient(90deg, #050304, #120b0d, #050304);
+        }
+
+        .transition-space::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(90deg, transparent 10%, rgba(181,151,101,0.10) 10.1%, transparent 10.2%, transparent 89.8%, rgba(181,151,101,0.10) 89.9%, transparent 90%),
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), transparent 20rem);
+            opacity: 0.55;
+            mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+        }
+
+        .transition-message {
+            position: relative;
+            font-family: "Playfair Display", "Noto Serif SC", serif;
+            font-style: italic;
+            font-size: clamp(1.7rem, 4vw, 4.6rem);
+            line-height: 1.2;
+            max-width: 58rem;
+            color: rgba(242,236,228,0.70);
+            padding: 0 1.5rem;
+        }
+
+        .transition-message::before,
+        .transition-message::after {
+            content: "";
+            display: block;
+            width: 8rem;
+            height: 1px;
+            margin: 2rem auto;
+            background: linear-gradient(90deg, transparent, rgba(181,151,101,0.42), transparent);
+        }
+
+        .flora-room {
+            --room-glow: rgba(197, 151, 86, 0.10);
+            background:
+                radial-gradient(circle at 15% 20%, rgba(98, 69, 38, 0.13), transparent 28rem),
+                radial-gradient(circle at 85% 70%, rgba(44, 80, 50, 0.08), transparent 28rem);
+        }
+
+        .landscape-room {
+            --room-glow: rgba(128, 153, 180, 0.09);
+            background:
+                radial-gradient(circle at 50% 8%, rgba(255,255,255,0.04), transparent 26rem),
+                linear-gradient(180deg, #070709, #100c0a 52%, #050304);
+        }
+
+        .sketch-room {
+            --room-glow: rgba(230, 220, 202, 0.07);
+            background:
+                radial-gradient(circle at 50% 20%, rgba(255,255,255,0.045), transparent 24rem),
+                linear-gradient(180deg, #0d0a0b, #080607);
+        }
+
+        .exit-pavilion {
+            min-height: 115vh;
+            text-align: center;
+            background:
+                radial-gradient(circle at 50% 55%, rgba(181,151,101,0.12), transparent 26rem),
+                radial-gradient(circle at 26% 72%, rgba(166,31,32,0.10), transparent 18rem),
+                linear-gradient(180deg, #050304, #0f0a0b 48%, #020101);
+        }
+
+        .lantern-row {
+            display: flex;
+            justify-content: center;
+            gap: clamp(1.1rem, 4vw, 5rem);
+            margin: 4rem 0 3rem;
+            opacity: 0.76;
+        }
+
+        .lantern {
+            width: 34px;
+            height: 54px;
+            border-radius: 45% 45% 52% 52%;
+            background:
+                radial-gradient(circle at 50% 32%, rgba(255,228,170,0.95), rgba(181,80,44,0.45) 54%, rgba(80,12,14,0.32));
+            box-shadow: 0 0 48px rgba(219,145,70,0.24);
+            animation: lanternFloat 4.8s ease-in-out infinite alternate;
+        }
+
+        .lantern:nth-child(2) { animation-delay: -1.2s; transform: scale(0.82); }
+        .lantern:nth-child(3) { animation-delay: -2.1s; transform: scale(1.1); }
+        .lantern:nth-child(4) { animation-delay: -0.6s; transform: scale(0.9); }
+
+        @keyframes lanternFloat {
+            from { translate: 0 -5px; opacity: 0.55; }
+            to { translate: 0 7px; opacity: 0.88; }
+        }
+
+        .signature-seal {
+            margin: 3rem auto 0;
+            width: 78px;
+            height: 78px;
+            display: grid;
+            place-items: center;
+            border: 2px solid rgba(205,49,47,0.72);
+            color: rgba(205,49,47,0.92);
+            font-family: "Noto Serif SC", serif;
+            font-size: 1.65rem;
+            transform: rotate(-5deg);
+        }
+
+        .hidden-detail {
+            position: absolute;
+            color: rgba(181,151,101,0.20);
+            font-family: "Noto Serif SC", serif;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .detail-poem {
+            right: 8vw;
+            top: 18vh;
+            writing-mode: vertical-rl;
+            font-size: clamp(1.1rem, 2vw, 2rem);
+            line-height: 2;
+        }
+
+        .detail-brush {
+            left: 7vw;
+            bottom: 12vh;
+            font-size: clamp(2rem, 4vw, 5rem);
+            opacity: 0.22;
+        }
+
+        .inspection {
+            position: fixed;
+            inset: 0;
+            z-index: 110;
+            display: grid;
+            place-items: center;
+            padding: 1rem;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(181,151,101,0.08), transparent 24rem),
+                rgba(0,0,0,0.86);
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 800ms cubic-bezier(.19,1,.22,1);
+        }
+
+        .inspection.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .inspection-panel {
+            width: min(96vw, 1280px);
+            max-height: 92vh;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            align-items: center;
+            transform: translateY(35px) scale(0.96);
+            opacity: 0;
+            transition: transform 900ms cubic-bezier(.19,1,.22,1), opacity 900ms ease;
+        }
+
+        .inspection.is-open .inspection-panel {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        @media (min-width: 960px) {
+            .inspection-panel {
+                grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.55fr);
+                gap: 3rem;
+            }
+        }
+
+        .inspection-art-shell {
+            overflow: hidden;
+            background: #020101;
+            border: 1px solid rgba(181,151,101,0.18);
+            box-shadow: 0 60px 120px rgba(0,0,0,0.78);
+            cursor: grab;
+            max-height: 84vh;
+            display: grid;
+            place-items: center;
+        }
+
+        .inspection-art-shell:active { cursor: grabbing; }
+
+        .inspection-art {
+            max-width: 100%;
+            max-height: 84vh;
+            object-fit: contain;
+            transform: scale(var(--zoom, 1)) translate3d(var(--pan-x, 0px), var(--pan-y, 0px), 0);
+            transform-origin: center;
+            transition: transform 450ms cubic-bezier(.19,1,.22,1);
+            will-change: transform;
+            filter: contrast(1.05) brightness(1.02);
+        }
+
+        .inspection-info {
+            padding: 2rem;
+            border-left: 1px solid rgba(181,151,101,0.18);
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+        }
+
+        .inspection-title {
+            font-family: "Noto Serif SC", serif;
+            font-size: clamp(2rem, 4vw, 4.5rem);
+            line-height: 1.05;
+            color: var(--museum-text);
+        }
+
+        .inspection-subtitle {
+            margin-top: 1rem;
+            color: rgba(181,151,101,0.74);
+            letter-spacing: 0.20em;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            line-height: 1.8;
+        }
+
+        .inspection-copy {
+            margin-top: 2rem;
+            color: rgba(242,236,228,0.60);
+            font-family: "Playfair Display", "Noto Serif SC", serif;
+            font-style: italic;
+            font-size: 1.12rem;
+            line-height: 1.8;
+        }
+
+        .inspection-controls {
+            margin-top: 2.2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .museum-control {
+            border: 1px solid rgba(181,151,101,0.24);
+            padding: 0.72rem 1rem;
+            color: rgba(242,236,228,0.76);
+            font-size: 0.68rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            transition: all 400ms ease;
+        }
+
+        .museum-control:hover,
+        .museum-control:focus-visible {
+            color: var(--museum-gold);
+            border-color: rgba(181,151,101,0.65);
+            outline: none;
+        }
+
+        .close-inspection {
+            position: fixed;
+            top: 1.2rem;
+            right: 1.2rem;
+            z-index: 112;
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            border: 1px solid rgba(181,151,101,0.28);
+            color: rgba(242,236,228,0.88);
+            background: rgba(0,0,0,0.3);
+            transition: all 400ms ease;
+        }
+
+        .close-inspection:hover,
+        .close-inspection:focus-visible {
+            color: var(--museum-gold);
+            border-color: rgba(181,151,101,0.68);
+            outline: none;
+        }
+
+        .mobile-note {
+            display: none;
+        }
+
+        @media (max-width: 680px) {
+            .museum-nav .desktop-links { display: none; }
+            .room, .transition-space { min-height: 115vh; }
+            .room-inner { padding-top: 8rem; padding-bottom: 8rem; }
+            .museum-frame { min-height: unset; }
+            .mobile-note {
+                display: block;
+                margin-top: 1rem;
+                color: rgba(242,236,228,0.44);
+                font-size: 0.75rem;
+                letter-spacing: 0.08em;
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased" data-room="entrance">
+    <canvas id="environment-canvas" aria-hidden="true"></canvas>
+
+    <!-- Opening sequence -->
+    <section id="entrance-sequence" class="entrance-sequence" aria-label="Museum entrance sequence">
+        <div class="entrance-veil"></div>
+        <div class="ink-cloud"></div>
+        <div class="entrance-panel">
+            <div class="seal-mark" aria-hidden="true">珑</div>
+            <h1 class="brush-title">
+                <span class="lang-en">Long Yue</span>
+                <span class="lang-zh hidden font-cjk not-italic">珑月</span>
+            </h1>
+            <p class="entrance-subtitle">
+                <span class="lang-en">A private museum of Chinese painting</span>
+                <span class="lang-zh hidden font-cjk">一座献给中国画的私人美术馆</span>
+            </p>
+            <button id="enter-gallery" class="enter-button" type="button">
+                <span class="lang-en">Enter the Gallery</span>
+                <span class="lang-zh hidden font-cjk">进入画廊</span>
+            </button>
+            <p class="mobile-note">
+                <span class="lang-en">Sound begins only after entering. You can mute it anytime.</span>
+                <span class="lang-zh hidden font-cjk">进入后开启声音，可随时静音。</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- Navigation preserved, upgraded for museum mood -->
+    <nav class="museum-nav" aria-label="Museum navigation">
+        <div class="max-w-[100rem] mx-auto px-5 md:px-10 py-5 flex justify-between items-center gap-6">
+            <a href="index.html" class="text-[11px] font-light tracking-[0.4em] uppercase text-brand-gold">
+                <span class="lang-en">Long Yue</span><span class="lang-zh hidden font-cjk tracking-widest text-sm">珑月</span>
+            </a>
+
+            <div class="desktop-links hidden md:flex items-center gap-9 text-[10px] font-light tracking-[0.3em] uppercase">
+                <a href="novels.html" class="hover:text-brand-gold transition-colors duration-500">
+                    <span class="lang-en">Novels</span><span class="lang-zh hidden font-cjk text-xs">小说</span>
+                </a>
+                <a href="calligraphy.html" class="hover:text-brand-gold transition-colors duration-500">
+                    <span class="lang-en">Calligraphy</span><span class="lang-zh hidden font-cjk text-xs">书法</span>
+                </a>
+                <a href="chinese-painting.html" class="text-brand-gold border-b border-brand-gold pb-1">
+                    <span class="lang-en">Painting</span><span class="lang-zh hidden font-cjk text-xs">国画</span>
+                </a>
+                <a href="seal-engraving.html" class="hover:text-brand-gold transition-colors duration-500">
+                    <span class="lang-en">Seal Engraving</span><span class="lang-zh hidden font-cjk text-xs">金石</span>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-4 md:gap-5 text-[10px] font-light tracking-[0.25em] uppercase">
+                <span id="room-indicator" class="hidden sm:inline text-white/40">Entrance Hall</span>
+                <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="false">Sound</button>
+                <div class="flex items-center gap-3 border-l border-white/15 pl-4 md:pl-6">
+                    <button id="btn-en" onclick="setLanguage('en')" class="hover:text-brand-gold transition-colors text-brand-gold" type="button">EN</button>
+                    <span class="text-white/20">/</span>
+                    <button id="btn-zh" onclick="setLanguage('zh')" class="hover:text-brand-gold transition-colors font-cjk text-xs" type="button">中文</button>
+                </div>
+            </div>
+        </div>
+        <div class="nav-progress"></div>
+    </nav>
+
+    <main class="content-layer camera-shell" id="museum">
+        <!-- Entrance Hall -->
+        <section class="room entrance-hall" data-room-name-en="Entrance Hall" data-room-name-zh="入口大厅" data-sound="hall">
+            <div class="architectural-lines"></div>
+            <div class="room-inner">
+                <div class="hall-medallion" aria-hidden="true"><span>月</span></div>
+                <span class="room-kicker">
+                    <span class="lang-en">Entrance Hall</span><span class="lang-zh hidden font-cjk">入口大厅</span>
+                </span>
+                <h2 class="room-title">
+                    <span class="lang-en">A Quiet World Opens</span>
+                    <span class="lang-zh hidden font-cjk">静境初开</span>
+                </h2>
+                <p class="room-note">
+                    <span class="lang-en">Walk slowly. The museum responds to the rhythm of your attention.</span>
+                    <span class="lang-zh hidden font-cjk not-italic">请缓步而行。美术馆会随着你的目光与步伐慢慢展开。</span>
+                </p>
+            </div>
+            <span class="hidden-detail detail-poem">一墨一境<br>一画一生</span>
+        </section>
+
+        <!-- Figure Gallery -->
+        <section class="room figure-room" data-room-name-en="Figure Gallery" data-room-name-zh="人物画展厅" data-sound="paper">
+            <div class="architectural-lines"></div>
+            <div class="room-inner">
+                <span class="room-kicker">
+                    <span class="lang-en">Room I</span><span class="lang-zh hidden font-cjk">第一展厅</span>
+                </span>
+                <h2 class="room-title">
+                    <span class="lang-en">Figure Painting</span>
+                    <span class="lang-zh hidden font-cjk">人物画</span>
+                </h2>
+                <p class="room-note">
+                    <span class="lang-en">A silent room prepared for future presence.</span>
+                    <span class="lang-zh hidden font-cjk not-italic">为未来的人物神韵，预留一室寂静。</span>
+                </p>
+
+                <div class="empty-gallery">
+                    <p>
+                        <span class="lang-en">The gallery is currently preparing this exhibition.</span>
+                        <span class="lang-zh hidden font-cjk not-italic">本展厅正在筹备中。</span>
+                    </p>
+                </div>
+            </div>
+            <span class="hidden-detail detail-brush">筆</span>
+        </section>
+
+        <section class="transition-space" data-room-name-en="Long Corridor" data-room-name-zh="长廊" data-sound="hall">
+            <p class="transition-message">
+                <span class="lang-en">Lantern light narrows into a long corridor.</span>
+                <span class="lang-zh hidden font-cjk not-italic">灯影渐深，步入长廊。</span>
+            </p>
+        </section>
+
+        <!-- Flora & Fauna -->
+        <section class="room flora-room" data-room-name-en="Flora & Fauna Gallery" data-room-name-zh="花鸟画展厅" data-sound="garden">
+            <div class="architectural-lines"></div>
+            <div class="room-inner">
+                <span class="room-kicker">
+                    <span class="lang-en">Room II</span><span class="lang-zh hidden font-cjk">第二展厅</span>
+                </span>
+                <h2 class="room-title">
+                    <span class="lang-en">Flora & Fauna</span>
+                    <span class="lang-zh hidden font-cjk">花鸟画</span>
+                </h2>
+                <p class="room-note">
+                    <span class="lang-en">Warm wood, quiet air, and living forms suspended in light.</span>
+                    <span class="lang-zh hidden font-cjk not-italic">木色温润，花鸟栖于光中。</span>
+                </p>
+
+                <div class="art-wall three" aria-label="Flora and Fauna paintings">
+                    <article class="artwork-card" data-title-en="Spring Breeze Brings Warmth" data-title-zh="春风送暖" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/ChunFengSongNuan.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Spring Breeze Brings Warmth">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/ChunFengSongNuan.jpg" alt="ChunFengSongNuan"></div>
+                            <div class="placard"><h4>春风送暖</h4><p class="lang-en">Spring Breeze Brings Warmth</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Blossoming Wealth" data-title-zh="花开富贵" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/HuaKaiFuGui.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Blossoming Wealth">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/HuaKaiFuGui.jpg" alt="HuaKaiFuGui"></div>
+                            <div class="placard"><h4>花开富贵</h4><p class="lang-en">Blossoming Wealth</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Golden Pheasant" data-title-zh="锦鸡富贵" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/JinJiFuGui.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Golden Pheasant">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/JinJiFuGui.jpg" alt="JinJiFuGui"></div>
+                            <div class="placard"><h4>锦鸡富贵</h4><p class="lang-en">Golden Pheasant</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Tiger Descending" data-title-zh="猛虎下山" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/MengHuXiaShan.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Tiger Descending">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/MengHuXiaShan.jpg" alt="MengHuXiaShan"></div>
+                            <div class="placard"><h4>猛虎下山</h4><p class="lang-en">Tiger Descending</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Fierce Tiger" data-title-zh="猛虎图" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/MengHu.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Fierce Tiger">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/MengHu.jpg" alt="MengHu"></div>
+                            <div class="placard"><h4>猛虎图</h4><p class="lang-en">Fierce Tiger</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Pine and Crane" data-title-zh="松鹤延年" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/SongHeYanNian.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Pine and Crane">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/SongHeYanNian.jpg" alt="SongHeYanNian"></div>
+                            <div class="placard"><h4>松鹤延年</h4><p class="lang-en">Pine and Crane</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Flower and Bird Study I" data-title-zh="花鸟一" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/huaniao1.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Flower and Bird Study I">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/huaniao1.jpg" alt="Study 1"></div>
+                            <div class="placard"><h4>花鸟一</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Flower and Bird Study II" data-title-zh="花鸟二" data-room-en="Flora & Fauna" data-room-zh="花鸟画" data-src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/huaniao2.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Flower and Bird Study II">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/huaniao2.jpg" alt="Study 2"></div>
+                            <div class="placard"><h4>花鸟二</h4></div>
+                        </button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="transition-space" data-room-name-en="Bridge Transition" data-room-name-zh="过桥" data-sound="water">
+            <p class="transition-message">
+                <span class="lang-en">A quiet bridge carries the eye toward mountains and water.</span>
+                <span class="lang-zh hidden font-cjk not-italic">一桥引路，山水将至。</span>
+            </p>
+        </section>
+
+        <!-- Landscapes -->
+        <section class="room landscape-room" data-room-name-en="Landscape Hall" data-room-name-zh="山水画大厅" data-sound="water">
+            <div class="architectural-lines"></div>
+            <div class="room-inner">
+                <span class="room-kicker">
+                    <span class="lang-en">Room III</span><span class="lang-zh hidden font-cjk">第三展厅</span>
+                </span>
+                <h2 class="room-title">
+                    <span class="lang-en">Landscapes</span>
+                    <span class="lang-zh hidden font-cjk">山水画</span>
+                </h2>
+                <p class="room-note">
+                    <span class="lang-en">The ceiling rises. The museum slows down for rivers, clouds, walls, and distance.</span>
+                    <span class="lang-zh hidden font-cjk not-italic">高厅开阔，云水长流，山河在此沉静展开。</span>
+                </p>
+
+                <article class="artwork-card hero-work" data-title-en="Ten Thousand Miles of the Yangtze River" data-title-zh="长江万里图" data-room-en="Landscapes" data-room-zh="山水画" data-src="国画_Chinese_Painting/Chinese_Landscape_Painting/YangZiRiver.jpg">
+                    <button class="artwork-button" type="button" aria-label="Inspect Ten Thousand Miles of the Yangtze River">
+                        <div class="museum-frame wide-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Landscape_Painting/YangZiRiver.jpg" alt="YangZiRiver"></div>
+                        <div class="placard"><h4>长江万里图</h4><p class="lang-en">Ten Thousand Miles of the Yangtze River</p></div>
+                    </button>
+                </article>
+
+                <div class="art-wall three" aria-label="Landscape paintings">
+                    <article class="artwork-card" data-title-en="The Great Pass" data-title-zh="雄关万里" data-room-en="Landscapes" data-room-zh="山水画" data-src="国画_Chinese_Painting/Chinese_Landscape_Painting/GreatWall-XiongGuanWanLi.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect The Great Pass">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Landscape_Painting/GreatWall-XiongGuanWanLi.jpg" alt="XiongGuanWanLi"></div>
+                            <div class="placard"><h4>雄关万里</h4><p class="lang-en">The Great Pass</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Sea of Clouds in Huangshan" data-title-zh="黄山云海" data-room-en="Landscapes" data-room-zh="山水画" data-src="国画_Chinese_Painting/Chinese_Landscape_Painting/HuangShanYunHai.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Sea of Clouds in Huangshan">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Landscape_Painting/HuangShanYunHai.jpg" alt="HuangShanYunHai"></div>
+                            <div class="placard"><h4>黄山云海</h4><p class="lang-en">Sea of Clouds in Huangshan</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Blue and Green Landscape" data-title-zh="金碧山水" data-room-en="Landscapes" data-room-zh="山水画" data-src="国画_Chinese_Painting/Chinese_Landscape_Painting/JinBiShanShui.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Blue and Green Landscape">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Landscape_Painting/JinBiShanShui.jpg" alt="JinBiShanShui"></div>
+                            <div class="placard"><h4>金碧山水</h4><p class="lang-en">Blue and Green Landscape</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="The Great Wall" data-title-zh="长城图" data-room-en="Landscapes" data-room-zh="山水画" data-src="国画_Chinese_Painting/Chinese_Landscape_Painting/GreatWall.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect The Great Wall">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Landscape_Painting/GreatWall.jpg" alt="Great Wall"></div>
+                            <div class="placard"><h4>长城图</h4><p class="lang-en">The Great Wall</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Golden Autumn" data-title-zh="金秋" data-room-en="Landscapes" data-room-zh="山水画" data-src="国画_Chinese_Painting/Chinese_Landscape_Painting/JinQiu.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Golden Autumn">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Landscape_Painting/JinQiu.jpg" alt="Jin Qiu"></div>
+                            <div class="placard"><h4>金秋</h4><p class="lang-en">Golden Autumn</p></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Little Bridge and Flowing Water" data-title-zh="小桥流水" data-room-en="Landscapes" data-room-zh="山水画" data-src="国画_Chinese_Painting/Chinese_Landscape_Painting/XiaoQiaoLiuShui.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Little Bridge and Flowing Water">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Chinese_Landscape_Painting/XiaoQiaoLiuShui.jpg" alt="Xiao Qiao Liu Shui"></div>
+                            <div class="placard"><h4>小桥流水</h4><p class="lang-en">Little Bridge and Flowing Water</p></div>
+                        </button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="transition-space" data-room-name-en="Garden Walk" data-room-name-zh="庭园小径" data-sound="garden">
+            <p class="transition-message">
+                <span class="lang-en">Petals pass through a garden walk before the studio quiet.</span>
+                <span class="lang-zh hidden font-cjk not-italic">花影掠过庭径，前方便是画室的静。</span>
+            </p>
+        </section>
+
+        <!-- XieYi & Sketches -->
+        <section class="room sketch-room" data-room-name-en="Sketch Gallery" data-room-name-zh="写意与速写展厅" data-sound="paper">
+            <div class="architectural-lines"></div>
+            <div class="room-inner">
+                <span class="room-kicker">
+                    <span class="lang-en">Room IV</span><span class="lang-zh hidden font-cjk">第四展厅</span>
+                </span>
+                <h2 class="room-title">
+                    <span class="lang-en">XieYi & Sketches</span>
+                    <span class="lang-zh hidden font-cjk">大写意与速写</span>
+                </h2>
+                <p class="room-note">
+                    <span class="lang-en">A studio-like room: paper, breath, wrist, ink, and the first living mark.</span>
+                    <span class="lang-zh hidden font-cjk not-italic">如入画室：纸、息、腕、墨，皆归一笔。</span>
+                </p>
+
+                <div class="art-wall three" aria-label="Freehand brushwork and sketches">
+                    <article class="artwork-card" data-title-en="Freehand Brushwork: Banana Leaves" data-title-zh="大写意：芭蕉" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-BaJiao.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Freehand Brushwork Banana Leaves">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-BaJiao.jpg" alt="Ba Jiao"></div>
+                            <div class="placard"><h4>大写意：芭蕉</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Freehand Brushwork: Orchid Grass" data-title-zh="大写意：兰草" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-LanCao.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Freehand Brushwork Orchid Grass">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-LanCao.jpg" alt="LanCao"></div>
+                            <div class="placard"><h4>大写意：兰草</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Freehand Brushwork: Pine Tree" data-title-zh="大写意：松树" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-SongShu-DaXieYi.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Freehand Brushwork Pine Tree">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-SongShu-DaXieYi.jpg" alt="SongShu"></div>
+                            <div class="placard"><h4>大写意：松树</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Freehand Brushwork: Gourd and Pumpkin" data-title-zh="大写意：葫芦南瓜" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-HuLu-NanGua-DaXieYi.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Freehand Brushwork Gourd and Pumpkin">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-HuLu-NanGua-DaXieYi.jpg" alt="HuLu"></div>
+                            <div class="placard"><h4>大写意：葫芦南瓜</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Freehand Brushwork: Chrysanthemum" data-title-zh="大写意：菊花" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-JuHua-DaXieYi.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Freehand Brushwork Chrysanthemum">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-JuHua-DaXieYi.jpg" alt="JuHua"></div>
+                            <div class="placard"><h4>大写意：菊花</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Freehand Brushwork: Ink Lotus Leaves" data-title-zh="大写意：墨叶荷花" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-MoYeHeHua.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Freehand Brushwork Ink Lotus Leaves">
+                            <div class="museum-frame"><img loading="lazy" decoding="async" src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-MoYeHeHua.jpg" alt="MoYeHeHua"></div>
+                            <div class="placard"><h4>大写意：墨叶荷花</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Sketch: Bridge" data-title-zh="速写：桥" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Sketch/bridge.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Sketch Bridge">
+                            <div class="museum-frame"><img class="grayscale" loading="lazy" decoding="async" src="国画_Chinese_Painting/Sketch/bridge.jpg" alt="Bridge"></div>
+                            <div class="placard"><h4>速写：桥</h4></div>
+                        </button>
+                    </article>
+
+                    <article class="artwork-card" data-title-en="Sketch: Cat" data-title-zh="速写：猫" data-room-en="XieYi & Sketches" data-room-zh="大写意与速写" data-src="国画_Chinese_Painting/Sketch/cat.jpg">
+                        <button class="artwork-button" type="button" aria-label="Inspect Sketch Cat">
+                            <div class="museum-frame"><img class="grayscale" loading="lazy" decoding="async" src="国画_Chinese_Painting/Sketch/cat.jpg" alt="Cat"></div>
+                            <div class="placard"><h4>速写：猫</h4></div>
+                        </button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ending -->
+        <section class="room exit-pavilion" data-room-name-en="Exit Pavilion" data-room-name-zh="归庭" data-sound="night">
+            <div class="room-inner">
+                <span class="room-kicker">
+                    <span class="lang-en">Exit Pavilion</span><span class="lang-zh hidden font-cjk">归庭</span>
+                </span>
+                <h2 class="room-title">
+                    <span class="lang-en">The Courtyard at Night</span>
+                    <span class="lang-zh hidden font-cjk">夜庭</span>
+                </h2>
+
+                <div class="lantern-row" aria-hidden="true">
+                    <span class="lantern"></span><span class="lantern"></span><span class="lantern"></span><span class="lantern"></span>
+                </div>
+
+                <p class="room-note mx-auto">
+                    <span class="lang-en">Thank you for walking through the museum.</span>
+                    <span class="lang-zh hidden font-cjk not-italic">感谢你缓步走过这座美术馆。</span>
+                </p>
+
+                <div class="signature-seal" aria-hidden="true">珑</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Immersive inspection mode -->
+    <section id="inspection" class="inspection" aria-modal="true" role="dialog" aria-labelledby="inspection-title" aria-hidden="true">
+        <button id="close-inspection" class="close-inspection" type="button" aria-label="Close inspection mode">×</button>
+        <div class="inspection-panel">
+            <div id="inspection-art-shell" class="inspection-art-shell">
+                <img id="inspection-art" class="inspection-art" alt="">
+            </div>
+            <aside class="inspection-info">
+                <p class="room-kicker" id="inspection-room">Gallery Room</p>
+                <h3 id="inspection-title" class="inspection-title">Artwork</h3>
+                <p id="inspection-subtitle" class="inspection-subtitle">High-resolution viewing mode</p>
+                <p class="inspection-copy">
+                    <span class="lang-en">Move your cursor slowly across the painting. Use zoom to inspect the surface, rhythm, and brush texture.</span>
+                    <span class="lang-zh hidden font-cjk not-italic">慢慢移动光标，使用放大功能观看画面肌理、笔触与气韵。</span>
+                </p>
+                <div class="inspection-controls">
+                    <button id="zoom-in" class="museum-control" type="button">Zoom +</button>
+                    <button id="zoom-out" class="museum-control" type="button">Zoom -</button>
+                    <button id="zoom-reset" class="museum-control" type="button">Reset</button>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            document.documentElement.lang = lang === 'zh' ? 'zh' : 'en';
+
+            document.querySelectorAll('.lang-en').forEach(el => {
+                lang === 'en' ? el.classList.remove('hidden') : el.classList.add('hidden');
+            });
+            document.querySelectorAll('.lang-zh').forEach(el => {
+                lang === 'zh' ? el.classList.remove('hidden') : el.classList.add('hidden');
+            });
+
+            document.getElementById('btn-en')?.classList.toggle('text-brand-gold', lang === 'en');
+            document.getElementById('btn-zh')?.classList.toggle('text-brand-gold', lang === 'zh');
+
+            const activeSection = document.querySelector('.room.is-active, .transition-space.is-active');
+            if (activeSection) updateRoomIndicator(activeSection);
+            if (window.updateInspectionLanguage) window.updateInspectionLanguage();
+        }
+
+        function currentLanguage() {
+            return localStorage.getItem('preferredLang') || 'en';
+        }
+
+        function updateRoomIndicator(section) {
+            const indicator = document.getElementById('room-indicator');
+            if (!indicator || !section) return;
+            const lang = window.currentLanguage();
+            indicator.textContent = lang === 'zh' ? section.dataset.roomNameZh : section.dataset.roomNameEn;
+        }
+
+        window.setLanguage = setLanguage;
+        window.currentLanguage = currentLanguage;
+        window.updateRoomIndicator = updateRoomIndicator;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(currentLanguage());
+        });
+    </script>
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const $ = (selector, scope = document) => scope.querySelector(selector);
+        const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+
+        let lenis;
+        let activeSoundRoom = 'hall';
+
+        function initLenis() {
+            if (prefersReducedMotion || !window.Lenis) return;
+
+            lenis = new Lenis({
+                duration: 1.75,
+                easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smoothWheel: true,
+                wheelMultiplier: 0.72,
+                touchMultiplier: 1.1
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            if (window.gsap && window.ScrollTrigger) {
+                lenis.on('scroll', ScrollTrigger.update);
+                gsap.ticker.add((time) => lenis.raf(time * 1000));
+                gsap.ticker.lagSmoothing(0);
+            }
+        }
+
+        class AmbientMuseumAudio {
+            constructor() {
+                this.ctx = null;
+                this.master = null;
+                this.roomGains = {};
+                this.muted = false;
+                this.started = false;
+                this.noteTimer = null;
+                this.noiseSources = [];
+            }
+
+            start() {
+                if (this.started) return;
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+
+                this.ctx = new AudioContext();
+                this.master = this.ctx.createGain();
+                this.master.gain.value = 0.11;
+                this.master.connect(this.ctx.destination);
+
+                ['hall', 'garden', 'water', 'paper', 'night'].forEach(room => {
+                    const gain = this.ctx.createGain();
+                    gain.gain.value = room === activeSoundRoom ? 1 : 0;
+                    gain.connect(this.master);
+                    this.roomGains[room] = gain;
+                });
+
+                this.createSoftPad();
+                this.createNoiseLayer('garden', 950, 0.025);
+                this.createNoiseLayer('water', 520, 0.035);
+                this.createNoiseLayer('paper', 1800, 0.016);
+                this.createNoiseLayer('night', 700, 0.024);
+                this.createGentleNotes();
+
+                this.started = true;
+            }
+
+            createSoftPad() {
+                const scale = [220, 261.63, 293.66, 329.63, 392.00];
+                scale.forEach((freq, index) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const filter = this.ctx.createBiquadFilter();
+
+                    osc.type = 'sine';
+                    osc.frequency.value = freq / (index % 2 ? 2 : 1);
+                    gain.gain.value = 0.008;
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 780;
+
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.roomGains.hall);
+                    gain.connect(this.roomGains.night);
+                    osc.start();
+                });
+            }
+
+            createNoiseLayer(room, cutoff, volume) {
+                const bufferSize = this.ctx.sampleRate * 2;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+
+                const source = this.ctx.createBufferSource();
+                const filter = this.ctx.createBiquadFilter();
+                const gain = this.ctx.createGain();
+
+                source.buffer = buffer;
+                source.loop = true;
+                filter.type = 'lowpass';
+                filter.frequency.value = cutoff;
+                gain.gain.value = volume;
+
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.roomGains[room]);
+                source.start();
+                this.noiseSources.push(source);
+            }
+
+            createGentleNotes() {
+                const playNote = () => {
+                    if (!this.ctx || this.muted) {
+                        this.noteTimer = setTimeout(playNote, 7000);
+                        return;
+                    }
+
+                    const notes = [329.63, 392.0, 440.0, 493.88, 587.33, 659.25];
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const filter = this.ctx.createBiquadFilter();
+                    const now = this.ctx.currentTime;
+                    const freq = notes[Math.floor(Math.random() * notes.length)] / (Math.random() > 0.6 ? 2 : 1);
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 1100;
+                    gain.gain.setValueAtTime(0, now);
+                    gain.gain.linearRampToValueAtTime(0.032, now + 1.2);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 6.4);
+
+                    osc.connect(filter);
+                    filter.connect(gain);
+
+                    const destination = activeSoundRoom === 'garden' ? this.roomGains.garden : this.roomGains.hall;
+                    gain.connect(destination);
+
+                    osc.start(now);
+                    osc.stop(now + 6.5);
+                    this.noteTimer = setTimeout(playNote, 8500 + Math.random() * 7500);
+                };
+                playNote();
+            }
+
+            setRoom(room) {
+                activeSoundRoom = room || 'hall';
+                if (!this.ctx || !this.started) return;
+
+                const now = this.ctx.currentTime;
+                Object.entries(this.roomGains).forEach(([name, gain]) => {
+                    gain.gain.cancelScheduledValues(now);
+                    gain.gain.setValueAtTime(gain.gain.value, now);
+                    gain.gain.linearRampToValueAtTime(name === activeSoundRoom ? 1 : 0, now + 2.5);
+                });
+            }
+
+            toggle() {
+                this.start();
+                this.muted = !this.muted;
+                const now = this.ctx.currentTime;
+                this.master.gain.cancelScheduledValues(now);
+                this.master.gain.linearRampToValueAtTime(this.muted ? 0 : 0.11, now + 0.8);
+                return !this.muted;
+            }
+        }
+
+        const audio = new AmbientMuseumAudio();
+
+        function initEntrance() {
+            const entrance = $('#entrance-sequence');
+            const enterButton = $('#enter-gallery');
+
+            if (!window.gsap) {
+                entrance.style.display = 'none';
+                return;
+            }
+
+            const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+            tl.to('.ink-cloud', { opacity: 1, duration: 1.7 })
+              .to('.seal-mark', { opacity: 1, scale: 1, rotation: -4, duration: 1.2, ease: 'back.out(1.4)' }, '-=0.8')
+              .to('.brush-title', { clipPath: 'inset(0 0% 0 0)', duration: 2.6, ease: 'power4.inOut' }, '-=0.25')
+              .to('.entrance-subtitle', { opacity: 1, y: -4, duration: 1.1 }, '-=0.9')
+              .to('.enter-button', { opacity: 1, y: -4, duration: 1 }, '-=0.55');
+
+            enterButton.addEventListener('click', () => {
+                audio.start();
+                $('#sound-toggle').setAttribute('aria-pressed', 'true');
+
+                gsap.to(entrance, {
+                    opacity: 0,
+                    scale: 1.04,
+                    filter: 'blur(16px)',
+                    duration: 1.45,
+                    ease: 'power3.inOut',
+                    onComplete: () => {
+                        entrance.remove();
+                        window.scrollTo({ top: 0, behavior: 'auto' });
+                    }
+                });
+            });
+        }
+
+        function initScrollMuseum() {
+            if (!window.gsap || !window.ScrollTrigger) return;
+            gsap.registerPlugin(ScrollTrigger);
+
+            ScrollTrigger.create({
+                start: 0,
+                end: 'max',
+                onUpdate: self => {
+                    document.documentElement.style.setProperty('--progress', `${self.progress * 100}%`);
+                }
+            });
+
+            $$('.room, .transition-space').forEach((section) => {
+                const inner = $('.room-inner', section);
+                if (inner) {
+                    gsap.to(inner, {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        duration: 1.8,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: section,
+                            start: 'top 72%',
+                            end: 'center 45%',
+                            scrub: prefersReducedMotion ? false : 1.4
+                        }
+                    });
+                }
+
+                gsap.to(section, {
+                    '--camera-y': '-28px',
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: section,
+                        start: 'top bottom',
+                        end: 'bottom top',
+                        scrub: prefersReducedMotion ? false : 1.8
+                    }
+                });
+
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: 'top 45%',
+                    end: 'bottom 45%',
+                    onEnter: () => activateSection(section),
+                    onEnterBack: () => activateSection(section)
+                });
+            });
+
+            $$('.transition-message').forEach((message) => {
+                gsap.fromTo(message,
+                    { opacity: 0, filter: 'blur(10px)', y: 28 },
+                    {
+                        opacity: 1,
+                        filter: 'blur(0px)',
+                        y: 0,
+                        duration: 1,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: message,
+                            start: 'top 80%',
+                            toggleActions: 'play none none reverse'
+                        }
+                    }
+                );
+            });
+
+            $$('.artwork-card').forEach((card) => {
+                gsap.to(card, {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 1.7,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 82%',
+                        onEnter: () => card.classList.add('is-visible'),
+                        onEnterBack: () => card.classList.add('is-visible'),
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+
+                ScrollTrigger.create({
+                    trigger: card,
+                    start: 'top 68%',
+                    end: 'bottom 30%',
+                    scrub: true,
+                    onUpdate: self => {
+                        const focus = 0.28 + Math.sin(self.progress * Math.PI) * 0.72;
+                        card.style.setProperty('--spotlight', focus.toFixed(2));
+                    }
+                });
+            });
+        }
+
+        function activateSection(section) {
+            $$('.room, .transition-space').forEach(s => s.classList.remove('is-active'));
+            section.classList.add('is-active');
+            window.updateRoomIndicator(section);
+            audio.setRoom(section.dataset.sound || 'hall');
+
+            const roomKey = (section.dataset.sound || 'hall');
+            document.body.dataset.room = roomKey;
+            particleMood = roomKey;
+        }
+
+        function initBreathingCamera() {
+            if (prefersReducedMotion) return;
+            const shell = $('.camera-shell');
+            let t = 0;
+            function loop() {
+                t += 0.008;
+                const x = Math.sin(t * 0.75) * 2.3;
+                const y = Math.cos(t) * 3.2;
+                shell.style.setProperty('--breath-x', `${x}px`);
+                shell.style.setProperty('--breath-y', `${y}px`);
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initArtworkInteractions() {
+            $$('.artwork-card').forEach(card => {
+                card.addEventListener('mousemove', (event) => {
+                    const rect = card.getBoundingClientRect();
+                    const dx = ((event.clientX - rect.left) / rect.width - 0.5) * 8;
+                    const dy = ((event.clientY - rect.top) / rect.height - 0.5) * 8;
+                    card.style.setProperty('--tilt-x', `${dx}px`);
+                    card.style.setProperty('--tilt-y', `${dy}px`);
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.setProperty('--tilt-x', '0px');
+                    card.style.setProperty('--tilt-y', '0px');
+                });
+
+                $('.artwork-button', card)?.addEventListener('click', () => openInspection(card));
+            });
+        }
+
+        let currentInspectionCard = null;
+        let zoom = 1;
+        let panX = 0;
+        let panY = 0;
+
+        function openInspection(card) {
+            currentInspectionCard = card;
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+
+            const img = $('#inspection-art');
+            img.src = card.dataset.src;
+            img.alt = card.dataset.titleEn || card.dataset.titleZh || 'Artwork';
+            $('#inspection').classList.add('is-open');
+            $('#inspection').setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            lenis?.stop();
+
+            window.updateInspectionLanguage();
+            updateZoom();
+            $('#close-inspection').focus();
+        }
+
+        function closeInspection() {
+            $('#inspection').classList.remove('is-open');
+            $('#inspection').setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            lenis?.start();
+            currentInspectionCard = null;
+        }
+
+        function updateInspectionLanguage() {
+            if (!currentInspectionCard) return;
+            const lang = window.currentLanguage();
+            const title = lang === 'zh' ? currentInspectionCard.dataset.titleZh : currentInspectionCard.dataset.titleEn;
+            const room = lang === 'zh' ? currentInspectionCard.dataset.roomZh : currentInspectionCard.dataset.roomEn;
+            $('#inspection-title').textContent = title || currentInspectionCard.dataset.titleZh || 'Artwork';
+            $('#inspection-room').textContent = room || 'Gallery Room';
+            $('#inspection-subtitle').textContent = lang === 'zh'
+                ? '沉浸式细节观看'
+                : 'High-resolution viewing mode';
+        }
+
+        function updateZoom() {
+            const art = $('#inspection-art');
+            art.style.setProperty('--zoom', zoom);
+            art.style.setProperty('--pan-x', `${panX}px`);
+            art.style.setProperty('--pan-y', `${panY}px`);
+        }
+
+        window.updateInspectionLanguage = updateInspectionLanguage;
+
+        function initInspection() {
+            $('#close-inspection').addEventListener('click', closeInspection);
+            $('#inspection').addEventListener('click', (event) => {
+                if (event.target.id === 'inspection') closeInspection();
+            });
+
+            $('#zoom-in').addEventListener('click', () => {
+                zoom = Math.min(3.6, zoom + 0.35);
+                updateZoom();
+            });
+
+            $('#zoom-out').addEventListener('click', () => {
+                zoom = Math.max(1, zoom - 0.35);
+                if (zoom === 1) { panX = 0; panY = 0; }
+                updateZoom();
+            });
+
+            $('#zoom-reset').addEventListener('click', () => {
+                zoom = 1; panX = 0; panY = 0; updateZoom();
+            });
+
+            const shell = $('#inspection-art-shell');
+            shell.addEventListener('mousemove', (event) => {
+                if (zoom <= 1) return;
+                const rect = shell.getBoundingClientRect();
+                panX = ((rect.width / 2) - (event.clientX - rect.left)) * 0.12 * zoom;
+                panY = ((rect.height / 2) - (event.clientY - rect.top)) * 0.12 * zoom;
+                updateZoom();
+            });
+
+            shell.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                zoom = Math.max(1, Math.min(4, zoom + (event.deltaY < 0 ? 0.18 : -0.18)));
+                if (zoom === 1) { panX = 0; panY = 0; }
+                updateZoom();
+            }, { passive: false });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && $('#inspection').classList.contains('is-open')) {
+                    closeInspection();
+                }
+            });
+        }
+
+        function initSoundButton() {
+            const button = $('#sound-toggle');
+            button.addEventListener('click', () => {
+                const enabled = audio.toggle();
+                button.setAttribute('aria-pressed', String(enabled));
+                button.textContent = enabled ? 'Mute' : 'Sound';
+            });
+        }
+
+        let particleMood = 'hall';
+
+        function initEnvironmentParticles() {
+            const canvas = $('#environment-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 9;
+
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const createParticles = ({ count, size, color, spread, yBias = 0 }) => {
+                const positions = new Float32Array(count * 3);
+                const speeds = new Float32Array(count);
+                for (let i = 0; i < count; i++) {
+                    positions[i * 3] = (Math.random() - 0.5) * spread;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * spread + yBias;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * spread;
+                    speeds[i] = 0.08 + Math.random() * 0.22;
+                }
+
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('speed', new THREE.BufferAttribute(speeds, 1));
+
+                const material = new THREE.PointsMaterial({
+                    size,
+                    color,
+                    transparent: true,
+                    opacity: 0.24,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                });
+
+                return new THREE.Points(geometry, material);
+            };
+
+            const dust = createParticles({ count: 450, size: 0.028, color: 0xb59765, spread: 32 });
+            const pollen = createParticles({ count: 250, size: 0.042, color: 0xd2a45d, spread: 28, yBias: 2 });
+            const petals = createParticles({ count: 90, size: 0.075, color: 0xf0b7b0, spread: 26, yBias: 3 });
+            const ink = createParticles({ count: 180, size: 0.05, color: 0x2d1a1f, spread: 24 });
+
+            scene.add(dust, pollen, petals, ink);
+
+            const mouse = { x: 0, y: 0 };
+            document.addEventListener('mousemove', (event) => {
+                mouse.x = (event.clientX / window.innerWidth - 0.5) * 0.35;
+                mouse.y = (event.clientY / window.innerHeight - 0.5) * 0.35;
+            });
+
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+
+                dust.rotation.y = t * 0.012 + mouse.x;
+                dust.rotation.x = t * 0.006 + mouse.y;
+
+                pollen.rotation.y = t * 0.022;
+                petals.rotation.z = Math.sin(t * 0.2) * 0.16;
+                petals.rotation.y = t * 0.025;
+
+                ink.rotation.y = -t * 0.01;
+                ink.rotation.x = Math.sin(t * 0.1) * 0.05;
+
+                dust.material.opacity = particleMood === 'hall' ? 0.22 : 0.13;
+                pollen.material.opacity = particleMood === 'garden' ? 0.28 : 0.04;
+                petals.material.opacity = particleMood === 'garden' ? 0.16 : 0.025;
+                ink.material.opacity = particleMood === 'paper' ? 0.18 : 0.07;
+
+                if (particleMood === 'water') {
+                    dust.material.opacity = 0.12;
+                    ink.material.opacity = 0.12;
+                }
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        window.addEventListener('load', () => {
+            initLenis();
+            initEntrance();
+            initScrollMuseum();
+            initBreathingCamera();
+            initArtworkInteractions();
+            initInspection();
+            initSoundButton();
+            initEnvironmentParticles();
+        });
+    </script>
+</body>
+</html>
+
+

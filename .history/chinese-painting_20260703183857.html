@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Long Yue | Digital Museum</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; background: #050304; color: #f2ece4; font-family: 'Playfair Display', serif; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; }
+        .ui-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .inspector { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; pointer-events: auto; opacity: 0; }
+        .placard-active { color: #b59765; font-size: 2rem; border-top: 1px solid #b59765; padding-top: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    
+    <!-- UI Layer -->
+    <div class="ui-overlay">
+        <div id="inspector" class="inspector">
+            <div id="inspector-content" class="placard-active">Painting Title</div>
+        </div>
+    </div>
+
+<script>
+// 1. DATA DEFINITION (Add your painting paths here)
+const museumData = [
+    { room: "Flora & Fauna", color: 0x2a2520, paintings: [
+        { src: 'https://picsum.photos/800/1000', title: 'Spring Breeze' },
+        { src: 'https://picsum.photos/800/1000', title: 'Golden Pheasant' }
+    ]},
+    { room: "Landscapes", color: 0x1a1e20, paintings: [
+        { src: 'https://picsum.photos/800/1000', title: 'Yangtze River' },
+        { src: 'https://picsum.photos/800/1000', title: 'Huangshan' }
+    ]}
+];
+
+// 2. ENGINE SETUP
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+// 3. ARCHITECTURE GENERATOR
+let paintingMeshes = [];
+museumData.forEach((room, roomIndex) => {
+    room.paintings.forEach((p, pIndex) => {
+        const geometry = new THREE.PlaneGeometry(4, 5);
+        const texture = new THREE.TextureLoader().load(p.src);
+        const material = new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide });
+        const mesh = new THREE.Mesh(geometry, material);
+        
+        // Arrange in a hallway
+        mesh.position.z = -(roomIndex * 20 + pIndex * 10);
+        mesh.position.x = (pIndex % 2 === 0) ? -6 : 6;
+        mesh.userData = { title: p.title };
+        
+        scene.add(mesh);
+        paintingMeshes.push(mesh);
+    });
+});
+
+// 4. LIGHTING & ATMOSPHERE
+const ambient = new THREE.AmbientLight(0xffffff, 0.2);
+scene.add(ambient);
+scene.fog = new THREE.FogExp2(0x050304, 0.05);
+
+// 5. INTERACTION (RAYCASTER)
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+window.addEventListener('click', (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(paintingMeshes);
+    if(intersects.length > 0) enterInspectionMode(intersects[0].object);
+});
+
+function enterInspectionMode(mesh) {
+    const inspector = document.getElementById('inspector');
+    document.getElementById('inspector-content').innerText = mesh.userData.title;
+    inspector.style.display = 'flex';
+    gsap.to(inspector, { opacity: 1, duration: 0.5 });
+    
+    // Smooth zoom
+    gsap.to(camera.position, { x: mesh.position.x, y: mesh.position.y, z: mesh.position.z + 5, duration: 1.5 });
+}
+
+// 6. SMOOTH SCROLL (LENIS + GSAP)
+const lenis = new Lenis();
+function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+requestAnimationFrame(raf);
+
+lenis.on('scroll', (e) => {
+    camera.position.z = -e.scroll * 0.05;
+});
+
+// 7. RENDER LOOP
+function animate() {
+    requestAnimationFrame(animate);
+    // Subtle float
+    paintingMeshes.forEach(m => m.rotation.y = Math.sin(Date.now() * 0.001) * 0.05);
+    renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>

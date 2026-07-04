@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | The Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'], cjk: ['Noto Serif SC', 'serif'] }, 
+                    colors: { brand: { bg: '#0f0a0b', text: '#f2ece4', gold: '#b59765' } } 
+                } 
+            } 
+        }
+    </script>
+    <style>
+        body { background-color: #0f0a0b; color: #f2ece4; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 4px; } 
+        ::-webkit-scrollbar-track { background: #050304; } 
+        ::-webkit-scrollbar-thumb { background: #3d2025; }
+        
+        #bg-canvas { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100vh; 
+            z-index: 0; 
+            pointer-events: none; 
+            opacity: 0.8;
+        }
+        
+        .content-layer { position: relative; z-index: 10; }
+        .hero-gradient { background: radial-gradient(circle at 50% 50%, rgba(181, 151, 101, 0.05) 0%, transparent 70%); }
+        .portal-link { transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1); border-bottom: 1px solid transparent; }
+        .portal-link:hover { color: #b59765; letter-spacing: 0.1em; border-bottom: 1px solid rgba(181, 151, 101, 0.5); padding-bottom: 0.5rem; text-shadow: 0 0 15px rgba(220, 38, 38, 0.4); }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-gold selection:text-black">
+    
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="fixed w-full z-50 top-0 bg-brand-bg/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-[100rem] mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
+            <a href="index.html" class="text-[11px] font-light tracking-[0.4em] uppercase text-brand-gold">
+                <span class="lang-en">Long Yue</span><span class="lang-zh hidden font-cjk tracking-widest text-sm">珑月</span>
+            </a>
+            <div class="flex items-center gap-8 md:gap-12 text-[10px] font-light tracking-[0.3em] uppercase">
+                <div class="hidden md:flex space-x-10">
+                    <a href="novels.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Novels</span><span class="lang-zh hidden font-cjk text-xs">小说</span></a>
+                    <a href="calligraphy.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Calligraphy</span><span class="lang-zh hidden font-cjk text-xs">书法</span></a>
+                    <a href="chinese-painting.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Painting</span><span class="lang-zh hidden font-cjk text-xs">国画</span></a>
+                    <a href="seal-engraving.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Seal Engraving</span><span class="lang-zh hidden font-cjk text-xs">金石</span></a>
+                </div>
+                <div class="flex items-center gap-3 border-l border-white/20 pl-8 md:pl-12">
+                    <button id="btn-en" onclick="setLanguage('en')" class="hover:text-brand-gold transition-colors text-brand-gold">EN</button>
+                    <span class="text-white/20">/</span>
+                    <button id="btn-zh" onclick="setLanguage('zh')" class="hover:text-brand-gold transition-colors font-cjk text-xs">中文</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex flex-col justify-center items-center content-layer hero-gradient px-6 text-center">
+        <span class="text-brand-gold/60 text-[10px] tracking-[0.5em] uppercase mb-8 font-light">
+            <span class="lang-en">Archive & Collection</span><span class="lang-zh hidden font-cjk">馆藏与档案</span>
+        </span>
+        <h1 class="text-6xl md:text-8xl lg:text-[100px] font-serif font-light mb-16 italic">
+            <span class="lang-en">A Private Library</span><span class="lang-zh hidden font-cjk not-italic">私人书阁</span>
+        </h1>
+        <div class="flex flex-col gap-8 md:gap-12 mt-8 text-xl md:text-4xl font-serif font-light">
+            <a href="novels.html" class="portal-link"><span class="lang-en">I. Fictions & Novels</span><span class="lang-zh hidden font-cjk">一. 小说</span></a>
+            <a href="calligraphy.html" class="portal-link"><span class="lang-en">II. Calligraphy</span><span class="lang-zh hidden font-cjk">二. 书法</span></a>
+            <a href="chinese-painting.html" class="portal-link"><span class="lang-en">III. Chinese Painting</span><span class="lang-zh hidden font-cjk">三. 国画</span></a>
+            <a href="seal-engraving.html" class="portal-link"><span class="lang-en">IV. Seal Engraving</span><span class="lang-zh hidden font-cjk">四. 金石</span></a>
+        </div>
+    </section>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            document.querySelectorAll('.lang-en').forEach(el => lang === 'en' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.querySelectorAll('.lang-zh').forEach(el => lang === 'zh' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.getElementById('btn-en').classList.toggle('text-brand-gold', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('text-brand-gold', lang === 'zh');
+        }
+        document.addEventListener('DOMContentLoaded', () => setLanguage(localStorage.getItem('preferredLang') || 'en'));
+    </script>
+
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Dragon Body Kinematics ---
+        const numSegments = 60; // Length of the dragon
+        const segmentLength = 12; // Distance between segments
+        const segments = [];
+        
+        // Initialize segments in the center
+        for (let i = 0; i < numSegments; i++) {
+            segments.push({ x: width / 2, y: height / 2 });
+        }
+
+        // --- Fire Particle System ---
+        let particles = [];
+        class FireParticle {
+            constructor(x, y, angle) {
+                this.x = x;
+                this.y = y;
+                // Eject fire forward based on the dragon's head angle, with some spread
+                const spread = (Math.random() - 0.5) * 0.5;
+                const speed = Math.random() * 4 + 2;
+                this.vx = Math.cos(angle + spread) * speed;
+                this.vy = Math.sin(angle + spread) * speed;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.01;
+                this.size = Math.random() * 15 + 5;
+                
+                // Fire colors (Red, Orange, Yellow)
+                const colors = ['220, 38, 38', '249, 115, 22', '250, 204, 21'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                this.size *= 0.95;
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color}, ${this.life})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = `rgba(${this.color}, ${this.life})`;
+                ctx.fill();
+            }
+        }
+
+        let time = 0;
+        let mouseX = width / 2;
+        let mouseY = height / 2;
+
+        // Subtle mouse tracking to influence the dragon's path
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Clear canvas with a very slight fade for a motion blur effect
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = 'rgba(15, 10, 11, 0.4)';
+            ctx.fillRect(0, 0, width, height);
+
+            time += 0.015;
+
+            // 1. Calculate Head Movement (Complex Lissajous curves + Mouse influence)
+            const targetX = width / 2 + Math.sin(time * 0.9) * (width * 0.3) + Math.sin(time * 2.1) * 100;
+            const targetY = height / 2 + Math.cos(time * 0.7) * (height * 0.3) + Math.cos(time * 1.5) * 100;
+            
+            // Smoothly move the head towards the calculated target
+            segments[0].x += (targetX - segments[0].x) * 0.05;
+            segments[0].y += (targetY - segments[0].y) * 0.05;
+
+            // 2. Inverse Kinematics for the Body
+            for (let i = 1; i < numSegments; i++) {
+                let dx = segments[i - 1].x - segments[i].x;
+                let dy = segments[i - 1].y - segments[i].y;
+                let angle = Math.atan2(dy, dx);
+                
+                segments[i].x = segments[i - 1].x - Math.cos(angle) * segmentLength;
+                segments[i].y = segments[i - 1].y - Math.sin(angle) * segmentLength;
+            }
+
+            // Calculate the angle the head is facing for fire emission
+            let headAngle = Math.atan2(segments[0].y - segments[1].y, segments[0].x - segments[1].x);
+
+            // 3. Draw the Dragon
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Draw body segments, tapering thickness from head to tail
+            for (let i = 1; i < numSegments; i++) {
+                ctx.beginPath();
+                ctx.moveTo(segments[i - 1].x, segments[i - 1].y);
+                ctx.lineTo(segments[i].x, segments[i].y);
+                
+                // Taper logic: Thicker at head (index 0), thinner at tail
+                const taper = 1 - (i / numSegments);
+                ctx.lineWidth = taper * 25 + 2; 
+                
+                // Color transition from bright red/gold head to darker tail
+                ctx.strokeStyle = `rgba(181, 28, 28, ${taper * 0.8 + 0.2})`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#dc2626';
+                ctx.stroke();
+            }
+
+            // Draw a subtle gold spine down the center
+            ctx.beginPath();
+            ctx.moveTo(segments[0].x, segments[0].y);
+            for (let i = 1; i < numSegments; i++) {
+                ctx.lineTo(segments[i].x, segments[i].y);
+            }
+            ctx.strokeStyle = 'rgba(181, 151, 101, 0.4)'; // Brand gold
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 0;
+            ctx.stroke();
+
+            // 4. Fire Breathing Logic
+            // Spawn fire randomly, more likely when moving fast
+            if (Math.random() > 0.3) {
+                // Spawn a burst of 3 particles from the head
+                for(let k = 0; k < 3; k++) {
+                    particles.push(new FireParticle(segments[0].x, segments[0].y, headAngle));
+                }
+            }
+
+            // Update and draw fire
+            ctx.globalCompositeOperation = 'lighter';
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw(ctx);
+                
+                if (particles[i].life <= 0 || particles[i].size <= 0.5) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        // Start the procedural animation
+        animate(); 
+    </script>
+</body>
+</html>

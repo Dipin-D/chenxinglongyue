@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | The Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'], cjk: ['Noto Serif SC', 'serif'] }, 
+                    colors: { brand: { bg: '#0f0a0b', text: '#f2ece4', gold: '#b59765' } } 
+                } 
+            } 
+        }
+    </script>
+    <style>
+        body { background-color: #0f0a0b; color: #f2ece4; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 4px; } 
+        ::-webkit-scrollbar-track { background: #050304; } 
+        ::-webkit-scrollbar-thumb { background: #3d2025; }
+        
+        #bg-canvas { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100vh; 
+            z-index: 0; 
+            pointer-events: none; 
+            opacity: 0.9;
+        }
+        
+        .content-layer { position: relative; z-index: 10; }
+        .hero-gradient { background: radial-gradient(circle at 50% 50%, rgba(181, 151, 101, 0.05) 0%, transparent 70%); }
+        .portal-link { transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1); border-bottom: 1px solid transparent; }
+        .portal-link:hover { color: #b59765; letter-spacing: 0.1em; border-bottom: 1px solid rgba(181, 151, 101, 0.5); padding-bottom: 0.5rem; text-shadow: 0 0 15px rgba(220, 38, 38, 0.4); }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-gold selection:text-black">
+    
+    <!-- Dynamic Procedural Dragon Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="fixed w-full z-50 top-0 bg-brand-bg/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-[100rem] mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
+            <a href="index.html" class="text-[11px] font-light tracking-[0.4em] uppercase text-brand-gold">
+                <span class="lang-en">Long Yue</span><span class="lang-zh hidden font-cjk tracking-widest text-sm">珑月</span>
+            </a>
+            <div class="flex items-center gap-8 md:gap-12 text-[10px] font-light tracking-[0.3em] uppercase">
+                <div class="hidden md:flex space-x-10">
+                    <a href="novels.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Novels</span><span class="lang-zh hidden font-cjk text-xs">小说</span></a>
+                    <a href="calligraphy.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Calligraphy</span><span class="lang-zh hidden font-cjk text-xs">书法</span></a>
+                    <a href="chinese-painting.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Painting</span><span class="lang-zh hidden font-cjk text-xs">国画</span></a>
+                    <a href="seal-engraving.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Seal Engraving</span><span class="lang-zh hidden font-cjk text-xs">金石</span></a>
+                </div>
+                <div class="flex items-center gap-3 border-l border-white/20 pl-8 md:pl-12">
+                    <button id="btn-en" onclick="setLanguage('en')" class="hover:text-brand-gold transition-colors text-brand-gold">EN</button>
+                    <span class="text-white/20">/</span>
+                    <button id="btn-zh" onclick="setLanguage('zh')" class="hover:text-brand-gold transition-colors font-cjk text-xs">中文</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex flex-col justify-center items-center content-layer hero-gradient px-6 text-center">
+        <span class="text-brand-gold/60 text-[10px] tracking-[0.5em] uppercase mb-8 font-light">
+            <span class="lang-en">Archive & Collection</span><span class="lang-zh hidden font-cjk">馆藏与档案</span>
+        </span>
+        <h1 class="text-6xl md:text-8xl lg:text-[100px] font-serif font-light mb-16 italic">
+            <span class="lang-en">A Private Library</span><span class="lang-zh hidden font-cjk not-italic">私人书阁</span>
+        </h1>
+        <div class="flex flex-col gap-8 md:gap-12 mt-8 text-xl md:text-4xl font-serif font-light">
+            <a href="novels.html" class="portal-link"><span class="lang-en">I. Fictions & Novels</span><span class="lang-zh hidden font-cjk">一. 小说</span></a>
+            <a href="calligraphy.html" class="portal-link"><span class="lang-en">II. Calligraphy</span><span class="lang-zh hidden font-cjk">二. 书法</span></a>
+            <a href="chinese-painting.html" class="portal-link"><span class="lang-en">III. Chinese Painting</span><span class="lang-zh hidden font-cjk">三. 国画</span></a>
+            <a href="seal-engraving.html" class="portal-link"><span class="lang-en">IV. Seal Engraving</span><span class="lang-zh hidden font-cjk">四. 金石</span></a>
+        </div>
+    </section>
+
+    <script>
+        // Language Toggle
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            document.querySelectorAll('.lang-en').forEach(el => lang === 'en' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.querySelectorAll('.lang-zh').forEach(el => lang === 'zh' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.getElementById('btn-en').classList.toggle('text-brand-gold', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('text-brand-gold', lang === 'zh');
+        }
+        document.addEventListener('DOMContentLoaded', () => setLanguage(localStorage.getItem('preferredLang') || 'en'));
+    </script>
+
+    <script>
+        // --- Full Procedural Chinese Dragon Rendering Engine ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 1. Setup Dragon Skeleton (Inverse Kinematics)
+        const numSegments = 50; 
+        const segmentLength = 10; 
+        const segments = [];
+        for (let i = 0; i < numSegments; i++) {
+            segments.push({ x: width / 2, y: height / 2 });
+        }
+
+        // 2. Setup Fire System
+        let particles = [];
+        class FireParticle {
+            constructor(x, y, angle) {
+                this.x = x;
+                this.y = y;
+                // Blast forward from mouth
+                const spread = (Math.random() - 0.5) * 0.6;
+                const speed = Math.random() * 5 + 3;
+                this.vx = Math.cos(angle + spread) * speed;
+                this.vy = Math.sin(angle + spread) * speed;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.015 + 0.01;
+                this.size = Math.random() * 20 + 8;
+                
+                const colors = ['255, 60, 0', '255, 120, 0', '255, 200, 50'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                this.size *= 0.96;
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color}, ${this.life * 0.8})`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = `rgba(${this.color}, ${this.life})`;
+                ctx.fill();
+            }
+        }
+
+        let time = 0;
+        let mouseX = width / 2;
+        let mouseY = height / 2;
+        let targetX = width / 2;
+        let targetY = height / 2;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Helper: Draw articulated limbs
+        function drawLeg(index, isLeft, currentTime) {
+            if(!segments[index] || !segments[index-1]) return;
+            let p1 = segments[index];
+            let p0 = segments[index-1];
+            
+            // Calculate base angle of body at this segment
+            let bodyAngle = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+            let sideMult = isLeft ? -1 : 1;
+            let legNormal = bodyAngle + (Math.PI / 2) * sideMult;
+            
+            // Animate leg paddling motion
+            let swing = Math.sin(currentTime * 3 + index) * 0.6;
+            let activeAngle = legNormal + swing;
+            
+            let length = 25;
+            let kneeX = p1.x + Math.cos(activeAngle) * length;
+            let kneeY = p1.y + Math.sin(activeAngle) * length;
+            
+            let footX = kneeX + Math.cos(activeAngle + (0.8 * sideMult)) * (length * 0.8);
+            let footY = kneeY + Math.sin(activeAngle + (0.8 * sideMult)) * (length * 0.8);
+            
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(kneeX, kneeY);
+            ctx.lineTo(footX, footY);
+            
+            // Draw Claws
+            for(let c = -0.3; c <= 0.3; c += 0.3) {
+                ctx.moveTo(footX, footY);
+                ctx.lineTo(footX + Math.cos(bodyAngle + c) * 12, footY + Math.sin(bodyAngle + c) * 12);
+            }
+            
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#000';
+            ctx.stroke();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Crystal clear canvas wiping so anatomy remains sharp
+            ctx.clearRect(0, 0, width, height);
+            
+            time += 0.015;
+
+            // Fluid target finding (wanders in a figure-8 if mouse is still, follows mouse if moving)
+            targetX += (mouseX - targetX) * 0.03;
+            targetY += (mouseY - targetY) * 0.03;
+            
+            const headTargetX = targetX + Math.sin(time) * 100;
+            const headTargetY = targetY + Math.cos(time * 1.5) * 100;
+
+            // Move Head
+            segments[0].x += (headTargetX - segments[0].x) * 0.08;
+            segments[0].y += (headTargetY - segments[0].y) * 0.08;
+
+            // Resolve IK Body Physics
+            for (let i = 1; i < numSegments; i++) {
+                let dx = segments[i - 1].x - segments[i].x;
+                let dy = segments[i - 1].y - segments[i].y;
+                let angle = Math.atan2(dy, dx);
+                
+                segments[i].x = segments[i - 1].x - Math.cos(angle) * segmentLength;
+                segments[i].y = segments[i - 1].y - Math.sin(angle) * segmentLength;
+            }
+
+            const head = segments[0];
+            const neck = segments[1];
+            const headAngle = Math.atan2(head.y - neck.y, head.x - neck.x);
+
+            // --- DRAW DRAGON ANATOMY ---
+
+            // 1. Legs (Front & Back)
+            drawLeg(12, true, time);
+            drawLeg(12, false, time);
+            drawLeg(35, true, time);
+            drawLeg(35, false, time);
+
+            // 2. Mane / Dorsal Spikes (Golden fringe along the back)
+            ctx.beginPath();
+            for(let i = 2; i < numSegments - 2; i++) {
+                let p = segments[i];
+                let angle = Math.atan2(segments[i-1].y - p.y, segments[i-1].x - p.x);
+                let normal = angle - Math.PI/2; 
+                let taper = 1 - (i / numSegments);
+                let rad = taper * 12 + 4; 
+                
+                ctx.moveTo(p.x + Math.cos(normal)*rad, p.y + Math.sin(normal)*rad);
+                ctx.lineTo(p.x + Math.cos(normal - 0.4)*(rad + 12), p.y + Math.sin(normal - 0.4)*(rad + 12));
+            }
+            ctx.strokeStyle = '#b59765';
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = '#b59765';
+            ctx.stroke();
+
+            // 3. Main Body Base (Thick Red)
+            ctx.beginPath();
+            ctx.moveTo(segments[0].x, segments[0].y);
+            for(let i = 1; i < numSegments; i++) {
+                ctx.lineTo(segments[i].x, segments[i].y);
+            }
+            // Taper effect built using loop over canvas shadow
+            for(let i = 0; i < numSegments - 1; i++) {
+                ctx.beginPath();
+                ctx.moveTo(segments[i].x, segments[i].y);
+                ctx.lineTo(segments[i+1].x, segments[i+1].y);
+                let taper = 1 - (i / numSegments);
+                ctx.lineWidth = taper * 24 + 4;
+                ctx.strokeStyle = '#991b1b';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#450a0a';
+                ctx.stroke();
+            }
+
+            // 4. Underside / Belly (Golden Core Line)
+            ctx.beginPath();
+            ctx.moveTo(segments[0].x, segments[0].y);
+            for(let i = 1; i < numSegments; i++) {
+                ctx.lineTo(segments[i].x, segments[i].y);
+            }
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#b59765';
+            ctx.shadowBlur = 0;
+            ctx.stroke();
+
+            // 5. Head & Details
+            // Horns/Antlers
+            ctx.beginPath();
+            ctx.moveTo(head.x, head.y);
+            ctx.lineTo(head.x - Math.cos(headAngle - 0.7)*35, head.y - Math.sin(headAngle - 0.7)*35);
+            ctx.moveTo(head.x, head.y);
+            ctx.lineTo(head.x - Math.cos(headAngle + 0.7)*35, head.y - Math.sin(headAngle + 0.7)*35);
+            ctx.strokeStyle = '#b59765';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Sinuous Whiskers
+            let whiskerBaseX = head.x + Math.cos(headAngle)*8;
+            let whiskerBaseY = head.y + Math.sin(headAngle)*8;
+            let wFloat = Math.sin(time * 4) * 15;
+            
+            ctx.beginPath();
+            ctx.moveTo(whiskerBaseX, whiskerBaseY);
+            ctx.quadraticCurveTo(whiskerBaseX + Math.cos(headAngle + 1)*40 + wFloat, whiskerBaseY + Math.sin(headAngle + 1)*40 + wFloat, whiskerBaseX + Math.cos(headAngle + 0.4)*70, whiskerBaseY + Math.sin(headAngle + 0.4)*70);
+            
+            ctx.moveTo(whiskerBaseX, whiskerBaseY);
+            ctx.quadraticCurveTo(whiskerBaseX + Math.cos(headAngle - 1)*40 - wFloat, whiskerBaseY + Math.sin(headAngle - 1)*40 - wFloat, whiskerBaseX + Math.cos(headAngle - 0.4)*70, whiskerBaseY + Math.sin(headAngle - 0.4)*70);
+            
+            ctx.strokeStyle = '#f2ece4';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Glowing Eyes
+            ctx.beginPath();
+            ctx.arc(head.x + Math.cos(headAngle - 0.35)*10, head.y + Math.sin(headAngle - 0.35)*10, 3, 0, Math.PI*2);
+            ctx.arc(head.x + Math.cos(headAngle + 0.35)*10, head.y + Math.sin(headAngle + 0.35)*10, 3, 0, Math.PI*2);
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffffff';
+            ctx.fill();
+
+            // --- FIRE BREATHING ---
+            
+            // Mouth location for spawning fire
+            let mouthX = head.x + Math.cos(headAngle) * 15;
+            let mouthY = head.y + Math.sin(headAngle) * 15;
+
+            // Rapid fire spawning
+            if (Math.random() > 0.2) {
+                for(let k = 0; k < 3; k++) {
+                    particles.push(new FireParticle(mouthX, mouthY, headAngle));
+                }
+            }
+
+            ctx.globalCompositeOperation = 'lighter'; // Luminous fire blend
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw(ctx);
+                
+                if (particles[i].life <= 0 || particles[i].size <= 0.5) {
+                    particles.splice(i, 1);
+                }
+            }
+            ctx.globalCompositeOperation = 'source-over'; // Reset blend mode
+        }
+
+        animate(); 
+    </script>
+</body>
+</html>

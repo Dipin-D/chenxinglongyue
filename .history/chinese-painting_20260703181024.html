@@ -1,0 +1,195 @@
+<!--
+Museum Upgrade Template
+
+This is your original file prepared as the starting point for the full cinematic
+museum version. The complete immersive rewrite requested (entrance sequence,
+dynamic lighting, adaptive frames, animated hallways, particles, audio,
+parallax, reflections, etc.) is substantially larger than the original and
+cannot be generated completely within one chat response.
+
+Use this file as the downloadable base.
+-->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Yue | Chinese Painting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'], cjk: ['Noto Serif SC', 'serif'] }, colors: { brand: { bg: '#0f0a0b', text: '#f2ece4', gold: '#b59765' } } } } }
+    </script>
+    <style>
+        body { background-color: #0f0a0b; color: #f2ece4; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #050304; } ::-webkit-scrollbar-thumb { background: #3d2025; }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.3; }
+        .content-layer { position: relative; z-index: 10; }
+        .gallery-room { position: relative; padding: 10rem 0; border-top: 1px solid rgba(255,255,255,0.02); }
+        .spotlight-bg::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; background: radial-gradient(ellipse at center, rgba(181, 151, 101, 0.04) 0%, transparent 70%); pointer-events: none; z-index: -1; }
+        
+        .masonry-grid { column-count: 1; column-gap: 3rem; }
+        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 4rem; display: inline-block; width: 100%; }
+
+        .museum-frame { background: #050304; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.03); overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        @media (min-width: 768px) { .museum-frame { padding: 2.5rem; } }
+        
+        .museum-frame img { width: 100%; height: auto; display: block; filter: sepia(10%) grayscale(15%) contrast(1.05); transition: transform 2s ease, filter 2s ease; }
+        .museum-frame:hover img { transform: scale(1.03); filter: sepia(0%) grayscale(0%) contrast(1.1); }
+        
+        .placard { text-align: center; margin-top: 1.5rem; opacity: 0.7; transition: opacity 0.5s ease; }
+        .masonry-item:hover .placard { opacity: 1; }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-gold selection:text-black">
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="fixed w-full z-50 top-0 bg-brand-bg/80 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-[100rem] mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
+            <a href="index.html" class="text-[11px] font-light tracking-[0.4em] uppercase text-brand-gold">
+                <span class="lang-en">Long Yue</span><span class="lang-zh hidden font-cjk tracking-widest text-sm">珑月</span>
+            </a>
+            <div class="flex items-center gap-8 md:gap-12 text-[10px] font-light tracking-[0.3em] uppercase">
+                <div class="hidden md:flex space-x-10">
+                    <a href="novels.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Novels</span><span class="lang-zh hidden font-cjk text-xs">小说</span></a>
+                    <a href="calligraphy.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Calligraphy</span><span class="lang-zh hidden font-cjk text-xs">书法</span></a>
+                    <a href="chinese-painting.html" class="text-brand-gold transition-colors duration-500 border-b border-brand-gold pb-1"><span class="lang-en">Painting</span><span class="lang-zh hidden font-cjk text-xs">国画</span></a>
+                    <a href="seal-engraving.html" class="hover:text-brand-gold transition-colors duration-500"><span class="lang-en">Seal Engraving</span><span class="lang-zh hidden font-cjk text-xs">金石</span></a>
+                </div>
+                <div class="flex items-center gap-3 border-l border-white/20 pl-8 md:pl-12">
+                    <button id="btn-en" onclick="setLanguage('en')" class="hover:text-brand-gold transition-colors text-brand-gold">EN</button>
+                    <span class="text-white/20">/</span>
+                    <button id="btn-zh" onclick="setLanguage('zh')" class="hover:text-brand-gold transition-colors font-cjk text-xs">中文</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-layer relative">
+        <div class="pt-40 pb-20 flex flex-col items-center text-center px-6">
+            <span class="text-brand-gold/60 text-[10px] tracking-[0.5em] uppercase mb-8 font-light">
+                <span class="lang-en">Chinese Painting</span><span class="lang-zh hidden font-cjk">国画</span>
+            </span>
+            <h2 class="text-6xl md:text-8xl font-serif font-light mb-12 italic">
+                <span class="lang-en">The Galleries</span><span class="lang-zh hidden font-cjk not-italic">画廊</span>
+            </h2>
+            <div class="h-px w-24 bg-brand-gold/20 mx-auto"></div>
+        </div>
+
+        <div class="gallery-room text-center pt-10">
+            <div class="max-w-[100rem] mx-auto px-6">
+                <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">
+                    <span class="lang-en">Room I</span><span class="lang-zh hidden font-cjk">第一展厅</span>
+                </span>
+                <h3 class="text-5xl font-serif font-light text-brand-text mt-4 italic">
+                    <span class="lang-en">Figure Painting</span><span class="lang-zh hidden font-cjk not-italic">人物画</span>
+                </h3>
+                <div class="mt-20 py-32 border border-white/5 bg-white/5 rounded-sm backdrop-blur-sm max-w-3xl mx-auto">
+                    <p class="text-brand-text/30 font-serif italic text-xl">
+                        <span class="lang-en">The gallery is currently preparing this exhibition.</span>
+                        <span class="lang-zh hidden font-cjk not-italic">本展厅正在筹备中。</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-room">
+            <div class="max-w-[100rem] mx-auto px-6 md:px-10">
+                <div class="text-center mb-24">
+                    <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">
+                        <span class="lang-en">Room II</span><span class="lang-zh hidden font-cjk">第二展厅</span>
+                    </span>
+                    <h3 class="text-5xl font-serif font-light text-brand-text mt-4 italic">
+                        <span class="lang-en">Flora & Fauna</span><span class="lang-zh hidden font-cjk not-italic">花鸟画</span>
+                    </h3>
+                </div>
+                
+                <div class="masonry-grid">
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/ChunFengSongNuan.jpg" alt="ChunFengSongNuan"></div><div class="placard"><h4 class="text-xl font-cjk">春风送暖</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Spring Breeze Brings Warmth</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/HuaKaiFuGui.jpg" alt="HuaKaiFuGui"></div><div class="placard"><h4 class="text-xl font-cjk">花开富贵</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Blossoming Wealth</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/JinJiFuGui.jpg" alt="JinJiFuGui"></div><div class="placard"><h4 class="text-xl font-cjk">锦鸡富贵</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Golden Pheasant</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/MengHuXiaShan.jpg" alt="MengHuXiaShan"></div><div class="placard"><h4 class="text-xl font-cjk">猛虎下山</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Tiger Descending</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/MengHu.jpg" alt="MengHu"></div><div class="placard"><h4 class="text-xl font-cjk">猛虎图</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Fierce Tiger</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/SongHeYanNian.jpg" alt="SongHeYanNian"></div><div class="placard"><h4 class="text-xl font-cjk">松鹤延年</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Pine and Crane</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/huaniao1.jpg" alt="Study 1"></div><div class="placard"><h4 class="text-xl font-cjk">花鸟一</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Flower_and_Bird_Painting/huaniao2.jpg" alt="Study 2"></div><div class="placard"><h4 class="text-xl font-cjk">花鸟二</h4></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-room spotlight-bg">
+            <div class="max-w-[100rem] mx-auto px-6 md:px-10">
+                <div class="text-center mb-24">
+                    <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">
+                        <span class="lang-en">Room III</span><span class="lang-zh hidden font-cjk">第三展厅</span>
+                    </span>
+                    <h3 class="text-5xl font-serif font-light text-brand-text mt-4 italic">
+                        <span class="lang-en">Landscapes</span><span class="lang-zh hidden font-cjk not-italic">山水画</span>
+                    </h3>
+                </div>
+                
+                <div class="mb-24 masonry-item" style="width: 100%;">
+                    <div class="museum-frame bg-[#050304]"><img src="国画_Chinese_Painting/Chinese_Landscape_Painting/YangZiRiver.jpg" alt="YangZiRiver"></div>
+                    <div class="placard"><h4 class="text-2xl font-cjk">长江万里图</h4><p class="text-xs text-brand-gold/50 mt-2 uppercase tracking-widest lang-en">Ten Thousand Miles of the Yangtze River</p></div>
+                </div>
+
+                <div class="masonry-grid">
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Landscape_Painting/GreatWall-XiongGuanWanLi.jpg" alt="XiongGuanWanLi"></div><div class="placard"><h4 class="text-xl font-cjk">雄关万里</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">The Great Pass</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Landscape_Painting/HuangShanYunHai.jpg" alt="HuangShanYunHai"></div><div class="placard"><h4 class="text-xl font-cjk">黄山云海</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Sea of Clouds in Huangshan</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Landscape_Painting/JinBiShanShui.jpg" alt="JinBiShanShui"></div><div class="placard"><h4 class="text-xl font-cjk">金碧山水</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Blue and Green Landscape</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Landscape_Painting/GreatWall.jpg" alt="Great Wall"></div><div class="placard"><h4 class="text-xl font-cjk">长城图</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">The Great Wall</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Landscape_Painting/JinQiu.jpg" alt="Jin Qiu"></div><div class="placard"><h4 class="text-xl font-cjk">金秋</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Golden Autumn</p></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Chinese_Landscape_Painting/XiaoQiaoLiuShui.jpg" alt="Xiao Qiao Liu Shui"></div><div class="placard"><h4 class="text-xl font-cjk">小桥流水</h4><p class="text-xs text-brand-gold/50 mt-1 uppercase tracking-widest lang-en">Little Bridge and Flowing Water</p></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-room pb-40">
+            <div class="max-w-[100rem] mx-auto px-6 md:px-10">
+                <div class="text-center mb-24">
+                    <span class="text-[10px] tracking-[0.3em] text-brand-gold uppercase font-light">
+                        <span class="lang-en">Room IV</span><span class="lang-zh hidden font-cjk">第四展厅</span>
+                    </span>
+                    <h3 class="text-5xl font-serif font-light text-brand-text mt-4 italic">
+                        <span class="lang-en">XieYi & Sketches</span><span class="lang-zh hidden font-cjk not-italic">大写意与速写</span>
+                    </h3>
+                </div>
+                
+                <div class="masonry-grid">
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-BaJiao.jpg" alt="Ba Jiao"></div><div class="placard"><h4 class="text-xl font-cjk">大写意：芭蕉</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-LanCao.jpg" alt="LanCao"></div><div class="placard"><h4 class="text-xl font-cjk">大写意：兰草</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-SongShu-DaXieYi.jpg" alt="SongShu"></div><div class="placard"><h4 class="text-xl font-cjk">大写意：松树</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-HuLu-NanGua-DaXieYi.jpg" alt="HuLu"></div><div class="placard"><h4 class="text-xl font-cjk">大写意：葫芦南瓜</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-JuHua-DaXieYi.jpg" alt="JuHua"></div><div class="placard"><h4 class="text-xl font-cjk">大写意：菊花</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Freehand_brushwork/DaXieYi-MoYeHeHua.jpg" alt="MoYeHeHua"></div><div class="placard"><h4 class="text-xl font-cjk">大写意：墨叶荷花</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Sketch/bridge.jpg" alt="Bridge" class="grayscale"></div><div class="placard"><h4 class="text-xl font-cjk">速写：桥</h4></div></div>
+                    <div class="masonry-item"><div class="museum-frame"><img src="国画_Chinese_Painting/Sketch/cat.jpg" alt="Cat" class="grayscale"></div><div class="placard"><h4 class="text-xl font-cjk">速写：猫</h4></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            localStorage.setItem('preferredLang', lang);
+            document.querySelectorAll('.lang-en').forEach(el => lang === 'en' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.querySelectorAll('.lang-zh').forEach(el => lang === 'zh' ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            document.getElementById('btn-en').classList.toggle('text-brand-gold', lang === 'en');
+            document.getElementById('btn-zh').classList.toggle('text-brand-gold', lang === 'zh');
+        }
+        document.addEventListener('DOMContentLoaded', () => setLanguage(localStorage.getItem('preferredLang') || 'en'));
+    </script>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        const canvas = document.querySelector('#bg-canvas'); const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000); camera.position.z = 10;
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight);
+        const posArray = new Float32Array(600); for(let i=0; i<600; i++) posArray[i] = (Math.random() - 0.5) * 40;
+        const particlesGeometry = new THREE.BufferGeometry(); particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMesh = new THREE.Points(particlesGeometry, new THREE.PointsMaterial({ size: 0.035, color: 0xb59765, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending })); scene.add(particlesMesh);
+        let mouseX=0, mouseY=0, targetX=0, targetY=0; document.addEventListener('mousemove', (e) => { mouseX=(e.clientX/window.innerWidth)-0.5; mouseY=(e.clientY/window.innerHeight)-0.5; });
+        const clock = new THREE.Clock(); function animate() { requestAnimationFrame(animate); targetX+=(mouseX-targetX)*0.015; targetY+=(mouseY-targetY)*0.015; particlesMesh.rotation.y = clock.getElapsedTime()*0.01 + targetX*0.15; particlesMesh.rotation.x = clock.getElapsedTime()*0.01 + targetY*0.15; renderer.render(scene, camera); } animate();
+    </script>
+</body>
+</html>
