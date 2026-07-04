@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Long Yue — a quiet digital museum of Chinese painting.">
   <title>Long Yue | Chinese Painting Museum</title>
+  <link rel="icon" href="long-yue-mark.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
@@ -33,6 +34,7 @@
     @media(max-width:800px){.gallery{display:grid;grid-template-columns:1fr;gap:4.5rem}.art,.art.portrait,.art.landscape-art,.art.feature{grid-column:1;width:min(100%,620px);margin:0 auto}}
     html[lang="en"] .hero .cn,html[lang="en"] .notice small{display:none}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}.frame img{transition:none}}
+    .brand{display:flex;align-items:center;gap:.7rem}.brand:before{content:"";width:27px;height:27px;flex:none;background:url('long-yue-mark.svg') center/contain no-repeat}
   </style>
 </head>
 <body>
@@ -104,9 +106,9 @@
       langButton.textContent=zh?'English':'中文';
       langButton.setAttribute('aria-label',zh?'Switch to English':'切换至中文');
       soundButton.textContent=audio.paused?(zh?'声音：关':'Sound Off'):(zh?'声音：开':'Sound On');
-      localStorage.setItem('painting-language',zh?'zh':'en');
+      localStorage.setItem('preferredLang',zh?'zh':'en');
     }
-    setLanguage(localStorage.getItem('painting-language')==='zh');
+    setLanguage(localStorage.getItem('preferredLang')==='zh');
     langButton.addEventListener('click',()=>setLanguage(document.documentElement.lang!=='zh-CN'));
     soundButton.addEventListener('click',async()=>{const zh=document.documentElement.lang==='zh-CN';if(audio.paused){try{audio.volume=.28;await audio.play();soundButton.textContent=zh?'声音：开':'Sound On';soundButton.setAttribute('aria-pressed','true')}catch(e){soundButton.textContent=zh?'声音不可用':'Sound Unavailable'}}else{audio.pause();soundButton.textContent=zh?'声音：关':'Sound Off';soundButton.setAttribute('aria-pressed','false')}});
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,items=document.querySelectorAll('.reveal');if(reduced||!('IntersectionObserver'in window)){items.forEach(el=>el.classList.add('visible'))}else{const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}}),{rootMargin:'0px 0px -8% 0px',threshold:.08});items.forEach(el=>observer.observe(el))}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Long Yue seal</title>
+  <desc id="desc">A vermilion Chinese-style seal bearing the characters Long Yue</desc>
+  <rect x="5" y="5" width="86" height="86" rx="3" fill="#8f302d"/>
+  <rect x="11" y="11" width="74" height="74" rx="1" fill="none" stroke="#eadfcb" stroke-width="2.5" opacity=".92"/>
+  <path d="M17 48h62M48 17v62" stroke="#eadfcb" stroke-width="1.5" opacity=".35"/>
+  <text x="48" y="59" text-anchor="middle" fill="#f4ead8" font-family="Noto Serif SC, Songti SC, serif" font-size="29" font-weight="500" letter-spacing="2">珑月</text>
+</svg>
