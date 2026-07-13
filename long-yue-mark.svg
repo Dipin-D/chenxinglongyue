@@ -1,8 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
   <title id="title">Long Yue seal</title>
-  <desc id="desc">A vermilion Chinese-style seal bearing the characters Long Yue</desc>
-  <rect x="5" y="5" width="86" height="86" rx="3" fill="#8f302d"/>
-  <rect x="11" y="11" width="74" height="74" rx="1" fill="none" stroke="#eadfcb" stroke-width="2.5" opacity=".92"/>
-  <path d="M17 48h62M48 17v62" stroke="#eadfcb" stroke-width="1.5" opacity=".35"/>
-  <text x="48" y="59" text-anchor="middle" fill="#f4ead8" font-family="Noto Serif SC, Songti SC, serif" font-size="29" font-weight="500" letter-spacing="2">珑月</text>
+  <desc id="desc">A vermilion Chinese-style seal bearing the characters 朧月</desc>
+  <defs>
+    <filter id="rough" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="12" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.1"/>
+    </filter>
+    <linearGradient id="ink" x1="18" y1="9" x2="78" y2="91" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b74438"/>
+      <stop offset=".48" stop-color="#9d332d"/>
+      <stop offset="1" stop-color="#7f2826"/>
+    </linearGradient>
+  </defs>
+  <rect x="5" y="5" width="86" height="86" rx="4" fill="url(#ink)"/>
+  <rect x="8.5" y="8.5" width="79" height="79" rx="2" fill="none" stroke="#f3e6d4" stroke-width="2.2" opacity=".86"/>
+  <rect x="13.5" y="13.5" width="69" height="69" rx="1.5" fill="none" stroke="#f3e6d4" stroke-width="1.1" opacity=".36"/>
+  <g filter="url(#rough)" fill="#f6ead8" text-anchor="middle" font-family="Songti SC, STSong, Noto Serif SC, serif" font-weight="700">
+    <text x="48" y="43" font-size="37" letter-spacing="-3">朧</text>
+    <text x="48" y="78" font-size="39" letter-spacing="-2">月</text>
+  </g>
+  <path d="M12 19c6 2 12-2 18 1M68 13c5 3 10 1 14 4M15 78c5-3 10 1 15-1M62 84c7-2 12 1 18-2" fill="none" stroke="#c85649" stroke-width="2" opacity=".28"/>
 </svg>

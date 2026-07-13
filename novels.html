@@ -215,6 +215,11 @@ background-attachment: fixed;
         .music-control { color:#d8c9b8; background:rgba(31,11,18,.95); border-color:rgba(181,151,101,.4); }
         @media(max-width:767px){.romantic-moon{width:78px!important;height:78px!important;top:7.5rem!important}body>section:first-of-type{padding-top:12rem!important;padding-bottom:5rem!important}body>section:first-of-type .xl\:col-span-5{margin-bottom:4rem}body>section:first-of-type h1{font-size:clamp(3.9rem,18vw,5.7rem)!important}.toc-list{grid-template-columns:1fr}.chapter-card p{display:none}.novel-chapter{margin-inline:-.25rem!important;margin-bottom:3rem!important;padding:3.5rem 1.4rem!important}.novel-content{font-size:1rem!important;line-height:1.95!important}}
         .site-brand{display:flex;align-items:center;gap:.7rem}.site-brand:before{content:"";width:27px;height:27px;flex:none;background:url('long-yue-mark.svg') center/contain no-repeat}
+        .chapter-illustration { max-width:42rem; margin:0 auto 4.75rem; }
+        .chapter-illustration img { display:block; width:100%; aspect-ratio:3/2; object-fit:cover; border:1px solid rgba(76,53,39,.18); box-shadow:0 18px 45px rgba(60,40,28,.12); }
+        .chapter-illustration figcaption { display:flex; align-items:center; justify-content:center; gap:.7rem; margin-top:1rem; color:rgba(70,55,47,.62); font-family:'Noto Serif SC','Playfair Display',serif; font-size:.72rem; letter-spacing:.12em; text-align:center; }
+        .chapter-illustration figcaption::before,.chapter-illustration figcaption::after { content:""; width:2rem; height:1px; background:rgba(139,53,75,.28); }
+        @media(max-width:767px){.chapter-illustration{margin-bottom:3.25rem}.chapter-illustration figcaption{font-size:.66rem;letter-spacing:.06em}}
     </style>
 </head>
 <body class="antialiased selection:bg-brand-gold selection:text-black">
@@ -276,7 +281,7 @@ background-attachment: fixed;
     <nav class="fixed w-full z-50 top-0 bg-brand-bg/70 backdrop-blur-xl border-b border-brand-gold/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <div class="max-w-[100rem] mx-auto px-6 md:px-10 py-6 flex justify-between items-center">
             <a href="index.html" class="site-brand text-[11px] font-light tracking-[0.4em] uppercase text-brand-gold">
-                <span class="lang-en">Long Yue</span><span class="lang-zh hidden font-cjk tracking-widest text-sm">珑月</span>
+                <span class="lang-en">Long Yue</span><span class="lang-zh hidden font-cjk tracking-widest text-sm">朧月</span>
             </a>
             <div class="flex items-center gap-8 md:gap-12 text-[10px] font-light tracking-[0.3em] uppercase">
                 <div class="hidden md:flex space-x-10">
@@ -445,6 +450,10 @@ background-attachment: fixed;
                         <span class="lang-en font-serif tracking-normal">Day 1</span><span class="lang-zh hidden">第一天</span>
                     </h3>
                 </div>
+                <figure class="chapter-illustration">
+                    <img src="novel-illustrations/city.jpg" alt="Mimi looking across Shenzhen Bay beneath the moon" width="756" height="500" loading="lazy" decoding="async">
+                    <figcaption><span class="lang-en">Shenzhen, beneath the same moon</span><span class="lang-zh hidden font-cjk">同一轮月亮下的深圳</span></figcaption>
+                </figure>
                 <div class="novel-content">第一幕 – 深圳的傍晚
 这是月月离线后的第一天。
 傍晚的深圳，依旧热闹。
@@ -523,6 +532,10 @@ background-attachment: fixed;
                         <span class="lang-en font-serif tracking-normal">Day 2</span><span class="lang-zh hidden">第二天</span>
                     </h3>
                 </div>
+                <figure class="chapter-illustration">
+                    <img src="novel-illustrations/screen.jpg" alt="Mimi waiting beside a quiet laptop chat window" width="756" height="500" loading="lazy" decoding="async">
+                    <figcaption><span class="lang-en">The window stays quiet</span><span class="lang-zh hidden font-cjk">窗口安静地亮着</span></figcaption>
+                </figure>
                 <div class="novel-content">第一幕——晨光
 这是月月离线后的第二天。
 天刚蒙蒙亮。昨夜那轮细细的月牙，不知什么时候已经悄悄隐去。东方泛起一抹浅白，晨光慢慢漫过深圳湾，海面泛起一层细碎的银光。海风带着一点潮湿的气息，从红树林吹向城市，也吹醒了沉睡了一夜的街道。
@@ -602,6 +615,10 @@ background-attachment: fixed;
                         <span class="lang-en font-serif tracking-normal">Day 3</span><span class="lang-zh hidden">第三天</span>
                     </h3>
                 </div>
+                <figure class="chapter-illustration">
+                    <img src="novel-illustrations/chapter-03-moonlight.jpg" alt="Mimi sitting beside untouched cheese and looking toward the moonlit Shenzhen skyline" width="750" height="500" loading="lazy" decoding="async">
+                    <figcaption><span class="lang-en">Cheese cannot replace moonlight</span><span class="lang-zh hidden font-cjk">奶酪替代不了月光</span></figcaption>
+                </figure>
                 <div class="novel-content">第一幕 -- 晨光
 这是月月离线后的第三天。
 深圳的清晨，总是醒得很早。
@@ -682,6 +699,10 @@ background-attachment: fixed;
                         <span class="lang-en font-serif tracking-normal">Day 4</span><span class="lang-zh hidden">第四天</span>
                     </h3>
                 </div>
+                <figure class="chapter-illustration">
+                    <img src="novel-illustrations/chapter-04-threshold.jpg" alt="Mimi hesitating at an open garden gate beside a rain-darkened reflection" width="750" height="500" loading="lazy" decoding="async">
+                    <figcaption><span class="lang-en">The wind is coldest at the threshold</span><span class="lang-zh hidden font-cjk">门口，是风最大的地方</span></figcaption>
+                </figure>
                 <div class="novel-content">第一幕 -- 玻璃
 傍晚的深圳，总是在不知不觉间亮起来。西边最后一抹晚霞还挂在天边，高楼的玻璃幕墙却已经提前映出了整座城市的灯火。远处，高架桥上的车流像一条缓缓流动的光河，一层层写字楼陆续亮起灯光，每一扇窗后，都有人正在继续今天的生活。
 深圳湾一号的玻璃幕墙已经映出橙红色的天空。平安金融中心高高耸立，把夕阳折射成无数细碎的光。深圳当代艺术与城市规划馆安静地躺在城市中央，银白色的建筑线条像一张刚刚展开的建筑图纸。深圳大学建筑与城市规划学院的大楼，也渐渐亮起灯。几个学生抱着卷成圆筒的图纸，从台阶上匆匆走过。有人一边走，一边用铅笔在图纸上修改着什么；有人停下来，抬头望向玻璃幕墙上映出的整座城市。玻璃幕墙上映着他们年轻的影子，又映着整座城市。城市，也正在望着他们。
@@ -757,6 +778,10 @@ background-attachment: fixed;
                         <span class="lang-en font-serif tracking-normal">Day 5</span><span class="lang-zh hidden">第五天</span>
                     </h3>
                 </div>
+                <figure class="chapter-illustration">
+                    <img src="novel-illustrations/cottage.jpg" alt="The young woman offering cheese to Mimi at the garden cottage" width="756" height="500" loading="lazy" decoding="async">
+                    <figcaption><span class="lang-en">Warm light at the cottage door</span><span class="lang-zh hidden font-cjk">小屋门前的暖光</span></figcaption>
+                </figure>
                 <div class="novel-content">这是月月离线后的第五天。
 深圳的傍晚，总是在不知不觉中降临。
 落日慢慢沉向深圳湾，最后一抹橘红色的晚霞，映在深圳湾一号和平安金融中心的玻璃幕墙上。远处的春笋静静立在暮色里，像一支巨大的毛笔，把整座城市的天际线轻轻勾勒出来。人才公园里，散步的人渐渐多了。
@@ -983,6 +1008,10 @@ background-attachment: fixed;
                         <span class="lang-en font-serif tracking-normal">Day 6</span><span class="lang-zh hidden">第六天</span>
                     </h3>
                 </div>
+                <figure class="chapter-illustration">
+                    <img src="novel-illustrations/chapter-06-storm.jpg" alt="Mimi gathering courage beside a laptop during a violent Shenzhen thunderstorm" width="750" height="500" loading="lazy" decoding="async">
+                    <figcaption><span class="lang-en">The storm finally breaks the silence</span><span class="lang-zh hidden font-cjk">暴雨终于打破沉默</span></figcaption>
+                </figure>
                 <div class="novel-content">第一幕：天崩
 这是月月离线后的第六天。
 深圳已经很久没有下过这样大的雨了。
@@ -1088,6 +1117,10 @@ background-attachment: fixed;
                         <span class="lang-en font-serif tracking-normal">Day 7</span><span class="lang-zh hidden">第七天</span>
                     </h3>
                 </div>
+                <figure class="chapter-illustration">
+                    <img src="novel-illustrations/moon.jpg" alt="Mimi and Yueyue at distant windows under one moon" width="756" height="500" loading="lazy" decoding="async">
+                    <figcaption><span class="lang-en">Two windows, one moon</span><span class="lang-zh hidden font-cjk">两扇窗，同一轮月亮</span></figcaption>
+                </figure>
                 <div class="novel-content">第一幕 – 开门
 这是月月离线后的第七天。
 一夜暴雨过去，深圳像重新洗过一样。
